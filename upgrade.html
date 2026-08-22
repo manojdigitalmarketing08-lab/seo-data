@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upgrade — SEO Keyword API</title>
+<meta name="description" content="Upgrade your SEO Keyword API plan for more monthly requests to Google Ads Keyword Planner and PageSpeed Insights.">
+<meta property="og:title" content="SEO Keyword API — Upgrade your plan">
+<meta property="og:description" content="More monthly requests to Google Ads Keyword Planner and PageSpeed Insights. Cancel anytime.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<style>
+  :root {
+    --primary: #6D28D9;
+    --primary-dark: #4C1D95;
+    --primary-darker: #2E1065;
+    --primary-light: #A78BFA;
+    --accent: #22D3EE;
+    --background: #F5F3FB;
+    --surface: #FFFFFF;
+    --text: #1E1B2E;
+    --text-muted: #6B6478;
+    --success: #16A34A;
+    --success-bg: #F0FDF4;
+    --danger: #DC2626;
+    --danger-bg: #FEF2F2;
+    --border: #E7E3F2;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-xl: 28px;
+
+    --shadow-sm: 0 1px 2px rgba(46, 16, 101, .06);
+    --shadow-md: 0 4px 12px rgba(46, 16, 101, .08);
+    --shadow-lg: 0 24px 64px -12px rgba(46, 16, 101, .35);
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 16px;
+    --space-4: 24px;
+    --space-5: 32px;
+    --space-6: 48px;
+    --space-7: 64px;
+
+    --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-body);
+    color: var(--text);
+    background: radial-gradient(circle at 15% 15%, #E9E3FA 0%, var(--background) 45%);
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .wrap { max-width: 920px; margin: 0 auto; }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--primary-darker);
+    margin-bottom: var(--space-5);
+  }
+  .brand-mark {
+    width: 26px; height: 26px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--primary-light));
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #fff;
+  }
+
+  h1 {
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: -.01em;
+    margin: 0 0 var(--space-2);
+  }
+  .lede {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin: 0 0 var(--space-5);
+    max-width: 60ch;
+  }
+
+  .email-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-5);
+    box-shadow: var(--shadow-sm);
+  }
+  .email-card label {
+    display: block;
+    font-size: .82rem;
+    font-weight: 600;
+    margin-bottom: var(--space-2);
+  }
+  .email-card input {
+    width: 100%;
+    font: inherit;
+    font-size: 1rem;
+    padding: 13px var(--space-3);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    min-height: 48px;
+  }
+  .email-card input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(109,40,217,.15);
+  }
+  .email-card .hint {
+    font-size: .8rem;
+    color: var(--text-muted);
+    margin: var(--space-2) 0 0;
+  }
+
+  .form-message {
+    display: none;
+    padding: 12px var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: .85rem;
+    margin-bottom: var(--space-4);
+    background: var(--danger-bg);
+    color: #991B1B;
+  }
+  .form-message.is-visible { display: block; }
+
+  .plans {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  .plan-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+  }
+  .plan-card.is-featured {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+    position: relative;
+  }
+  .plan-badge {
+    position: absolute;
+    top: -12px;
+    right: var(--space-4);
+    background: var(--primary);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 999px;
+  }
+
+  .plan-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 var(--space-2);
+  }
+  .plan-price {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    margin: 0 0 var(--space-1);
+  }
+  .plan-price span {
+    font-size: .95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .plan-quota {
+    font-size: .88rem;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-4);
+  }
+
+  .plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-5);
+    flex: 1;
+  }
+  .plan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    font-size: .88rem;
+    padding: 7px 0;
+    border-top: 1px solid var(--border);
+  }
+  .plan-features li:first-child { border-top: none; }
+  .plan-features li::before {
+    content: "✓";
+    color: var(--success);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .btn-plan {
+    width: 100%;
+    min-height: 48px;
+    border: 1.5px solid var(--primary);
+    border-radius: var(--radius-md);
+    background: #fff;
+    color: var(--primary);
+    font: inherit;
+    font-weight: 700;
+    font-size: .95rem;
+    cursor: pointer;
+  }
+  .btn-plan:hover { background: #F3EEFC; }
+  .btn-plan:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .is-featured .btn-plan {
+    background: var(--primary);
+    color: #fff;
+  }
+  .is-featured .btn-plan:hover { background: #5B21B6; }
+  .btn-plan:disabled { opacity: .6; cursor: progress; }
+
+  @media (max-width: 640px) {
+    .plans { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">⌁</span> SEO Keyword API</div>
+
+  <h1>Upgrade your plan</h1>
+  <p class="lede">More monthly requests to Google Ads Keyword Planner and PageSpeed Insights. Cancel anytime from Paddle's customer portal link in your receipt email.</p>
+
+  <div class="email-card">
+    <label for="email">Your account email</label>
+    <input type="email" id="email" autocomplete="email" placeholder="you@company.com">
+    <p class="hint">The email you signed up with — your key stays the same, only your quota changes.</p>
+  </div>
+
+  <div id="formMessage" class="form-message" role="alert"></div>
+
+  <div class="plans">
+    <div class="plan-card">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">$19<span>/month</span></div>
+      <div class="plan-quota">500 requests / month</div>
+      <ul class="plan-features">
+        <li>Keyword Ideas &amp; Historical Metrics</li>
+        <li>PageSpeed Insights</li>
+        <li>Cached results, faster repeat lookups</li>
+      </ul>
+      <button type="button" class="btn-plan" data-plan="starter">Upgrade to Starter</button>
+    </div>
+
+    <div class="plan-card is-featured">
+      <span class="plan-badge">Most popular</span>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$49<span>/month</span></div>
+      <div class="plan-quota">1,000 requests / month</div>
+      <ul class="plan-features">
+        <li>Everything in Starter</li>
+        <li>2x the monthly request volume</li>
+        <li>Priority support</li>
+      </ul>
+      <button type="button" class="btn-plan" data-plan="pro">Upgrade to Pro</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // TODO: replace with your real Paddle sandbox values before use.
+  var CONFIG = {
+    environment: 'sandbox',
+    clientToken: 'REPLACE_ME_PADDLE_CLIENT_SIDE_TOKEN',
+    priceIds: {
+      starter: 'REPLACE_ME_PRICE_ID_STARTER',
+      pro: 'REPLACE_ME_PRICE_ID_PRO'
+    }
+  };
+
+  Paddle.Environment.set(CONFIG.environment);
+  Paddle.Initialize({ token: CONFIG.clientToken });
+
+  var emailInput = document.getElementById('email');
+  var formMessage = document.getElementById('formMessage');
+  var buttons = document.querySelectorAll('.btn-plan');
+
+  function showError(text) {
+    formMessage.textContent = text;
+    formMessage.classList.add('is-visible');
+  }
+
+  function clearError() {
+    formMessage.textContent = '';
+    formMessage.classList.remove('is-visible');
+  }
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      clearError();
+      var email = emailInput.value.trim();
+
+      if (!isValidEmail(email)) {
+        showError('Enter the email address you signed up with.');
+        emailInput.focus();
+        return;
+      }
+
+      var plan = btn.getAttribute('data-plan');
+      var priceId = CONFIG.priceIds[plan];
+
+      Paddle.Checkout.open({
+        items: [{ priceId: priceId, quantity: 1 }],
+        customer: { email: email },
+        customData: { email: email, plan: plan }
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

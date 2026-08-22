@@ -1,0 +1,20 @@
+{
+  "name": "Rate Limit Monitor",
+  "active": true,
+  "nodes": [
+    {"id":"a3b2f36f-8d55-434d-80cf-bd058fc9768a","name":"Hourly Trigger","type":"n8n-nodes-base.scheduleTrigger","typeVersion":1.3,"position":[0,0],"parameters":{"rule":{"interval":[{"field":"hours","hoursInterval":1}]}}},
+    {"id":"3e88715b-05aa-46f2-a6c3-6deddb3c6112","name":"Compute Window","type":"n8n-nodes-base.code","typeVersion":2,"position":[220,0],"parameters":{"mode":"runOnceForAllItems","language":"javaScript","jsCode":"const oneHourAgoISO = new Date(Date.now() - 60 * 60 * 1000).toISOString();\nconst threshold = 50;\nreturn [{ json: { oneHourAgoISO, threshold } }];"}},
+    {"id":"ea88a75d-8944-4660-8355-b93e821d3438","name":"Fetch Live Google Ads Calls","type":"n8n-nodes-base.httpRequest","typeVersion":4.4,"position":[440,0],"parameters":{"method":"GET","url":"=https://pcmsotnmkxeriapajyco.supabase.co/rest/v1/usage_log?cache_hit=eq.false&tool_name=in.(Get_Keyword_Ideas,Get_Historical_Keyword_Metrics)&called_at=gte.{{ encodeURIComponent($json.oneHourAgoISO) }}&select=id","authentication":"predefinedCredentialType","nodeCredentialType":"supabaseApi","sendHeaders":false}},
+    {"id":"15d189b5-cdb7-4f25-9049-aedaae726e0f","name":"Evaluate Volume","type":"n8n-nodes-base.code","typeVersion":2,"position":[660,0],"parameters":{"mode":"runOnceForAllItems","language":"javaScript","jsCode":"const count = $input.all().length;\nconst threshold = $('Compute Window').first().json.threshold;\nreturn [{ json: { count, threshold, overThreshold: count >= threshold } }];"}},
+    {"id":"2ae74039-6924-49da-b244-1a3dfaa25235","name":"Over Threshold?","type":"n8n-nodes-base.if","typeVersion":2.3,"position":[880,0],"parameters":{"conditions":{"combinator":"and","options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict"},"conditions":[{"leftValue":"={{ $json.overThreshold }}","operator":{"type":"boolean","operation":"equals"},"rightValue":true}]}}},
+    {"id":"a812ed8f-b157-426b-902a-4cb5c24c0371","name":"Raise Rate Limit Warning","type":"n8n-nodes-base.code","typeVersion":2,"position":[1100,-80],"parameters":{"mode":"runOnceForAllItems","language":"javaScript","jsCode":"throw new Error('RATE_LIMIT_WARNING: ' + $json.count + ' live Google Ads calls in the last hour (threshold: ' + $json.threshold + '). Check the google_ads_calls_hourly view in Supabase.');"}}
+  ],
+  "connections": {
+    "Hourly Trigger":{"main":[[{"node":"Compute Window","type":"main","index":0}]]},
+    "Compute Window":{"main":[[{"node":"Fetch Live Google Ads Calls","type":"main","index":0}]]},
+    "Fetch Live Google Ads Calls":{"main":[[{"node":"Evaluate Volume","type":"main","index":0}]]},
+    "Evaluate Volume":{"main":[[{"node":"Over Threshold?","type":"main","index":0}]]},
+    "Over Threshold?":{"main":[[{"node":"Raise Rate Limit Warning","type":"main","index":0}]]}
+  },
+  "settings": {"executionOrder": "v1"}
+}
