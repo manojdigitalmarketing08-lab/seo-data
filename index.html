@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Server for Keyword Data — SEO Keyword API</title>
+<meta name="description" content="An MCP server giving ChatGPT, Claude, Cursor, and AI agents direct access to keyword data, search volume, and PageSpeed Insights. No exports, no copying.">
+<meta property="og:title" content="MCP Server for Keyword Data — SEO Keyword API">
+<meta property="og:description" content="An MCP server built for AI clients. Real keyword ideas, search volume history, and PageSpeed Insights, queried directly from the conversation.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "SEO Keyword API",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "description": "MCP server exposing Google Ads Keyword Planner and PageSpeed Insights data to AI clients like ChatGPT, Claude, and Cursor.",
+  "offers": [
+    { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD" },
+    { "@type": "Offer", "name": "Starter", "price": "19", "priceCurrency": "USD" },
+    { "@type": "Offer", "name": "Pro", "price": "49", "priceCurrency": "USD" }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav-inner" id="navInner">
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">⌁</span> SEO Keyword API</a>
+    <nav class="primary-nav" aria-label="Primary">
+      <ul>
+        <li><a href="#product">Product</a></li>
+        <li><a href="#integrations">Integrations</a></li>
+        <li><a href="#developers">Developers</a></li>
+        <li><a href="#mcp-tools">Docs</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-primary" href="signup.html">Get Started</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">☰</button>
+    </div>
+  </div>
+  <div class="container mobile-menu" id="mobileMenu">
+    <a href="#product">Product</a>
+    <a href="#integrations">Integrations</a>
+    <a href="#developers">Developers</a>
+    <a href="#mcp-tools">Docs</a>
+    <a href="#pricing">Pricing</a>
+    <a href="signup.html">Get Started</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- 1. HERO -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Powered by MCP</span>
+        <h1 id="hero-heading">The MCP Server That Gives ChatGPT, Claude &amp; AI Agents Real Keyword Data</h1>
+        <p class="lede">SEO Keyword API is a Model Context Protocol server for AI. Point Claude, ChatGPT, or Cursor at it for live keyword and PageSpeed data — no exports, no copy-pasting.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="signup.html">Get Started</a>
+          <a class="btn btn-outline" href="#mcp-tools">View Documentation</a>
+        </div>
+        <p class="trust-note">Free tier includes 50 requests/month. No credit card required.</p>
+      </div>
+
+      <div class="hero-visual" role="img" aria-label="Diagram: your keyword tool connects to AI clients including ChatGPT, Claude, and Cursor.">
+        <div class="flow-card">
+          <div class="flow-row">
+            <div class="flow-box">Keyword Tool</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-box is-accent">MCP Server</div>
+            <div class="flow-arrow">↓</div>
+          </div>
+          <div class="flow-cols">
+            <div class="flow-box">ChatGPT</div>
+            <div class="flow-box">Claude</div>
+            <div class="flow-box">Cursor</div>
+            <div class="flow-box">AI Agents</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. SUPPORTED AI PLATFORMS -->
+  <section id="product" aria-labelledby="platforms-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="platforms-heading">Works With the AI Tools You Already Use</h2>
+        <p>Every major assistant now speaks the same language for tool access. Whether your team lives in ChatGPT, ships features in Cursor, or already relies on Claude for research, the same AI agent tools apply here — connect once, and every client gets identical keyword and performance data.</p>
+      </div>
+      <div class="grid-4">
+        <div class="platform-card">
+          <div class="platform-mark" aria-hidden="true">◐</div>
+          <h3>ChatGPT</h3>
+          <p>Via ChatGPT's MCP connector support.</p>
+        </div>
+        <div class="platform-card">
+          <div class="platform-mark" aria-hidden="true">✦</div>
+          <h3>Claude</h3>
+          <p>Claude Desktop and Claude Code, via MCP configuration.</p>
+        </div>
+        <div class="platform-card">
+          <div class="platform-mark" aria-hidden="true">▣</div>
+          <h3>Cursor</h3>
+          <p>Add as a server in Cursor's settings.</p>
+        </div>
+        <div class="platform-card">
+          <div class="platform-mark" aria-hidden="true">◆</div>
+          <h3>Other MCP Clients</h3>
+          <p>Any client that speaks the Model Context Protocol.</p>
+        </div>
+      </div>
+      <p class="fine-print">Exact setup steps vary by client and by how each platform implements MCP connectors — see <a href="#developers">Developers</a> for configuration details.</p>
+    </div>
+  </section>
+
+  <!-- 3. THE PROBLEM -->
+  <section aria-labelledby="problem-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="problem-heading">Your Keyword Data Is Trapped in Separate Tools</h2>
+        <p>Most SEO workflows still bounce between five browser tabs before an AI ever sees the numbers. You pull volume from one keyword planner, a screenshot from another performance tool, then paste both into a chat window and hope the AI remembers the context by the third message. An AI SEO tool wired directly into live data skips every one of those steps.</p>
+      </div>
+      <div class="compare-grid">
+        <div class="compare-card is-before">
+          <h3>Today</h3>
+          <div class="steps-list">
+            <div class="step-pill">Keyword Tool</div>
+            <div class="step-arrow">↓</div>
+            <div class="step-pill">Export CSV</div>
+            <div class="step-arrow">↓</div>
+            <div class="step-pill">Open Spreadsheet</div>
+            <div class="step-arrow">↓</div>
+            <div class="step-pill">Analyze Data</div>
+            <div class="step-arrow">↓</div>
+            <div class="step-pill">Copy Into AI</div>
+            <div class="step-arrow">↓</div>
+            <div class="step-pill">Ask AI to Analyze</div>
+          </div>
+        </div>
+        <div class="compare-card is-after">
+          <h3>With MCP</h3>
+          <div class="steps-list">
+            <div class="step-pill">AI Client</div>
+            <div class="step-arrow">↓</div>
+            <div class="step-pill">MCP</div>
+            <div class="step-arrow">↓</div>
+            <div class="step-pill">Keyword Data</div>
+            <div class="step-arrow">↓</div>
+            <div class="step-pill">AI Analyzes It Directly</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3B. WHY MCP -->
+  <section aria-labelledby="why-mcp-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="why-mcp-heading">Why an MCP Server, Not Just Another API</h2>
+        <p>APIs solve half the problem. You still need someone — or some code — to call them, parse the response, and hand the result to whatever tool actually needs it. A Model Context Protocol server removes that middle step entirely: it describes its own capabilities to any connected AI client, so Claude, ChatGPT, or Cursor can discover the keyword and PageSpeed tools on their own and call them directly, with no custom glue code per client.</p>
+        <p>That matters most once AI agent tools become part of a real workflow rather than a one-off chat. An agent researching content ideas, auditing a client site, or drafting a brief doesn't need a developer to wire up a new endpoint every time it needs fresh data — it just asks the MCP server, the same way it would ask any other tool it already knows how to use.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. HOW IT WORKS -->
+  <section aria-labelledby="how-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="how-heading">How It Works</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <h3>Connect</h3>
+          <p>Sign up for a free API key — no card required. Your key authenticates every request, no password needed.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <h3>Configure MCP</h3>
+          <p>Add the MCP server to your AI client's configuration, using your API key.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <h3>Ask Your AI</h3>
+          <p>Your AI can now retrieve keyword ideas, search-volume history, and PageSpeed data mid-conversation.</p>
+        </div>
+      </div>
+      <div class="prompt-example">
+        <div class="prompt-label">Example prompt</div>
+        <blockquote>"Find low-competition keywords related to photobooth software with at least 500 monthly searches."</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. LIVE DEMO -->
+  <section aria-labelledby="demo-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="demo-heading">See What Your AI Can Do With Keyword Data</h2>
+        <p>Here's what a real AI keyword research tool exchange looks like once your client is connected.</p>
+      </div>
+      <div class="chat-window">
+        <div class="chat-bubble is-user">
+          <div class="chat-label">You</div>
+          Find high-intent keywords for a photobooth software business.
+        </div>
+        <div class="chat-bubble is-ai">
+          <div class="chat-label">AI</div>
+          I'll pull keyword ideas from the Keyword Ideas tool for "photobooth software"...
+          <div class="table-scroll">
+            <table class="keyword-table">
+              <thead>
+                <tr><th scope="col">Keyword</th><th scope="col">Avg. monthly searches</th><th scope="col">Competition</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>photobooth software</td><td>2,400</td><td>Low</td></tr>
+                <tr><td>photo booth software</td><td>1,900</td><td>Low</td></tr>
+                <tr><td>photobooth app</td><td>1,300</td><td>Medium</td></tr>
+                <tr><td>digital photobooth</td><td>880</td><td>Low</td></tr>
+              </tbody>
+            </table>
+          </div>
+          Here are the strongest opportunities based on search volume and competition.
+          <div class="demo-badge">⌁ Powered by MCP</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. WHAT YOU CAN DO -->
+  <section aria-labelledby="features-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="features-heading">What You Can Do</h2>
+        <p>Three tools, one connection. Once your API key is wired in, any MCP client can call all three without extra setup per feature.</p>
+      </div>
+      <div class="grid-3">
+        <div class="feature-card">
+          <h3>Keyword Ideas</h3>
+          <p>Generate keyword ideas from a seed term, scoped by country and language, from Google Ads Keyword Planner.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Search Volume &amp; Trends</h3>
+          <p>Pull historical monthly search volume so your AI keyword research reflects real seasonality, not guesses.</p>
+        </div>
+        <div class="feature-card">
+          <h3>PageSpeed Insights</h3>
+          <p>Check performance scores and Core Web Vitals for any URL before recommending technical changes.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Smart Caching</h3>
+          <p>Repeat lookups for the same seed keyword and location return instantly from cache.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Simple API-Key Auth</h3>
+          <p>One bearer token per account — no OAuth flow, no session management to wire up.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Works Mid-Conversation</h3>
+          <p>Your AI calls the tools it needs, when it needs them — one shared connection across every MCP client, no dashboard tab required.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. USE CASES -->
+  <section aria-labelledby="usecases-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="usecases-heading">Use Cases</h2>
+        <p>Six ways teams are already putting a keyword MCP server to work — from one-off research questions to automated agent workflows that run without anyone opening a dashboard.</p>
+      </div>
+      <div class="grid-3">
+        <div class="usecase-card">
+          <div class="usecase-tag">SEO Research</div>
+          <p>Discover opportunities without leaving your AI client.</p>
+          <blockquote>"Find keywords for my SaaS with under 1,000 monthly searches."</blockquote>
+        </div>
+        <div class="usecase-card">
+          <div class="usecase-tag">Content Planning</div>
+          <p>Time content around real demand, not guesses.</p>
+          <blockquote>"Show me the 12-month search trend for 'tax software'."</blockquote>
+        </div>
+        <div class="usecase-card">
+          <div class="usecase-tag">Technical SEO</div>
+          <p>Flag performance issues before they cost rankings.</p>
+          <blockquote>"Check PageSpeed Insights for these 10 client URLs."</blockquote>
+        </div>
+        <div class="usecase-card">
+          <div class="usecase-tag">Agency Workflows</div>
+          <p>Repeat the same research across every client site.</p>
+          <blockquote>"Generate a keyword brief for each client's homepage."</blockquote>
+        </div>
+        <div class="usecase-card">
+          <div class="usecase-tag">AI Agents</div>
+          <p>Ground automated workflows in real search data, pulled through the same MCP server your AI already trusts.</p>
+          <blockquote>"Look up search volume before drafting this outline."</blockquote>
+        </div>
+        <div class="usecase-card">
+          <div class="usecase-tag">Competitive Framing</div>
+          <p>Compare how demand differs across close variants.</p>
+          <blockquote>"Compare volume for 'photo booth' vs 'photobooth'."</blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. FOR DEVELOPERS -->
+  <section id="developers" aria-labelledby="dev-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="dev-heading">Built for Developers. Designed for AI.</h2>
+      </div>
+      <p class="fine-print" style="margin-bottom: var(--space-4);">This is a keyword research API for developers, not a dashboard buried behind five clicks. Wire the MCP server into your client once, and every AI agent on your team inherits the same keyword and PageSpeed access — no separate integration per tool.</p>
+      <div class="dev-grid">
+        <div>
+          <div class="code-block">
+            <button class="btn-copy" type="button" data-copy-target="mcpConfig">Copy</button>
+            <pre id="mcpConfig">{
+  <span class="str">"mcpServers"</span>: {
+    <span class="str">"seo-keyword-api"</span>: {
+      <span class="str">"url"</span>: <span class="str">"https://YOUR-MCP-ENDPOINT/mcp"</span>,
+      <span class="str">"headers"</span>: {
+        <span class="str">"Authorization"</span>: <span class="str">"Bearer YOUR_API_KEY"</span>
+      }
+    }
+  }
+}</pre>
+          </div>
+        </div>
+        <div>
+          <ol class="dev-steps">
+            <li>Get your API key from SEO Keyword API's free sign-up — no card required.</li>
+            <li>Add the server config above to your AI client (Claude Desktop, Cursor, or any MCP-compatible client).</li>
+            <li>Replace <code>YOUR_API_KEY</code> with the key from your signup confirmation.</li>
+            <li>Start querying keyword and PageSpeed data directly from the conversation.</li>
+          </ol>
+          <div class="cta-row" style="margin-top: var(--space-4);">
+            <a class="btn btn-outline" href="#mcp-tools">View Available Tools →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. MCP TOOLS -->
+  <section id="mcp-tools" aria-labelledby="tools-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="tools-heading">Available Tools</h2>
+        <p>These are the three tools any connected AI client can call — no hidden endpoints, no extras waiting behind a paywall on the Free tier. Every request is authenticated with your API key and counted against your monthly quota.</p>
+      </div>
+      <div class="tool-list">
+        <details class="tool-card">
+          <summary>get_keyword_ideas <span class="tool-desc">— find keyword ideas from a seed term</span></summary>
+          <div class="tool-body">
+            <div class="tool-body-grid">
+              <div>
+                <h4>Input</h4>
+                <ul>
+                  <li><code>keyword</code> — string, seed term</li>
+                  <li><code>country</code> — string, target location</li>
+                  <li><code>language</code> — string, optional</li>
+                </ul>
+              </div>
+              <div>
+                <h4>Returns</h4>
+                <ul>
+                  <li>Keyword</li>
+                  <li>Average monthly searches</li>
+                  <li>Competition level</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </details>
+        <details class="tool-card">
+          <summary>get_historical_keyword_metrics <span class="tool-desc">— monthly search volume over time</span></summary>
+          <div class="tool-body">
+            <div class="tool-body-grid">
+              <div>
+                <h4>Input</h4>
+                <ul>
+                  <li><code>keywords</code> — array of strings</li>
+                  <li><code>country</code> — string, target location</li>
+                </ul>
+              </div>
+              <div>
+                <h4>Returns</h4>
+                <ul>
+                  <li>Monthly search volume history</li>
+                  <li>Trend direction</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </details>
+        <details class="tool-card">
+          <summary>get_pagespeed_insights <span class="tool-desc">— performance &amp; Core Web Vitals for a URL</span></summary>
+          <div class="tool-body">
+            <div class="tool-body-grid">
+              <div>
+                <h4>Input</h4>
+                <ul>
+                  <li><code>url</code> — string, page to test</li>
+                  <li><code>strategy</code> — "mobile" or "desktop"</li>
+                </ul>
+              </div>
+              <div>
+                <h4>Returns</h4>
+                <ul>
+                  <li>Performance score</li>
+                  <li>LCP, INP, CLS</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. INTEGRATIONS -->
+  <section id="integrations" aria-labelledby="integrations-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="integrations-heading">Connect Your SEO Data Stack</h2>
+      </div>
+      <div class="hero-visual" role="img" aria-label="Diagram: Google Ads Keyword Planner and PageSpeed Insights connect to ChatGPT, Claude, and Cursor.">
+        <div class="flow-card" style="max-width: 640px; margin: 0 auto;">
+          <div class="flow-cols" style="grid-template-columns: 1fr 1fr;">
+            <div class="flow-box">Google Ads Keyword Planner</div>
+            <div class="flow-box">PageSpeed Insights</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box is-accent">MCP Server</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-cols" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="flow-box">ChatGPT</div>
+            <div class="flow-box">Claude</div>
+            <div class="flow-box">Cursor</div>
+          </div>
+        </div>
+      </div>
+      <p class="integration-note">SEO Keyword API is an MCP server for AI clients, currently powered by Google Ads Keyword Planner and Google PageSpeed Insights. Support for additional keyword data providers is on the roadmap.</p>
+    </div>
+  </section>
+
+  <!-- 11. SECURITY -->
+  <section aria-labelledby="security-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="security-heading">Your Credentials. Your Data. Your Control.</h2>
+        <p>We built this the way we'd want a vendor to treat our own credentials: minimal surface area, no shared secrets, and nothing collected that isn't needed to enforce your quota.</p>
+      </div>
+      <div class="security-grid">
+        <div class="security-item">
+          <span class="security-icon" aria-hidden="true">◆</span>
+          <div>
+            <h3>API-key auth, no passwords</h3>
+            <p>Every request is authenticated with a single bearer token issued at signup — nothing else to manage.</p>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="security-icon" aria-hidden="true">◆</span>
+          <div>
+            <h3>Your data never leaks into another account</h3>
+            <p>Every database table enforces row-level security, so there's no broad public write path one customer's request could ever hit another's data through.</p>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="security-icon" aria-hidden="true">◆</span>
+          <div>
+            <h3>Your searches stay private, even in the shared cache</h3>
+            <p>Keyword lookups are cached by normalized seed term and location only — never linked back to your account, even though the cache speeds up everyone's queries.</p>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="security-icon" aria-hidden="true">◆</span>
+          <div>
+            <h3>Billing handled by Paddle</h3>
+            <p>Card details are processed entirely by Paddle as merchant of record — they never touch our servers.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. PRICING -->
+  <section id="pricing" aria-labelledby="pricing-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="pricing-heading">Pricing</h2>
+        <p>Start free. Upgrade when you need more requests from your AI SEO tool.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="plan-card">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">$0<span>/month</span></div>
+          <div class="plan-quota">50 requests / month</div>
+          <ul class="plan-features">
+            <li>Keyword Ideas &amp; Historical Metrics</li>
+            <li>PageSpeed Insights</li>
+            <li>Community support</li>
+          </ul>
+          <a class="btn btn-outline btn-block" href="signup.html">Start Free</a>
+        </div>
+        <div class="plan-card is-featured">
+          <span class="plan-badge">Most popular</span>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">$49<span>/month</span></div>
+          <div class="plan-quota">1,000 requests / month</div>
+          <ul class="plan-features">
+            <li>Everything in Starter</li>
+            <li>2x the monthly request volume</li>
+            <li>Priority support</li>
+          </ul>
+          <a class="btn btn-primary btn-block" href="upgrade.html">Choose Pro</a>
+        </div>
+        <div class="plan-card">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price">$19<span>/month</span></div>
+          <div class="plan-quota">500 requests / month</div>
+          <ul class="plan-features">
+            <li>Keyword Ideas &amp; Historical Metrics</li>
+            <li>PageSpeed Insights</li>
+            <li>Cached results, faster repeat lookups</li>
+          </ul>
+          <a class="btn btn-outline btn-block" href="upgrade.html">Choose Starter</a>
+        </div>
+      </div>
+      <p class="pricing-note">Cancel anytime from Paddle's customer portal link in your receipt email.</p>
+    </div>
+  </section>
+
+  <!-- 13. DOCS CTA BANNER -->
+  <section aria-labelledby="docs-cta-heading">
+    <div class="container">
+      <div class="cta-banner">
+        <h2 id="docs-cta-heading">Start Building AI-Powered SEO Workflows</h2>
+        <p>Get an API key, wire up your MCP client, and start querying real keyword data in minutes — no dashboards, no CSV exports, no waiting on a developer to build the integration.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="signup.html">Get Started</a>
+          <a class="btn btn-outline" href="#mcp-tools">Read Documentation</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14. FAQ -->
+  <section aria-labelledby="faq-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="faq-heading">Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>What is MCP?</summary>
+          <div class="faq-body">Model Context Protocol is the open standard that lets AI assistants call outside tools and data sources the same way every time. Claude, ChatGPT, and Cursor can all talk directly to a server built on it, no custom integration required.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Which AI clients are supported?</summary>
+          <div class="faq-body">ChatGPT, Claude Desktop, Claude Code, Cursor, and any other AI tools for SEO built to speak the same open protocol. Exact setup steps vary slightly by client, but the underlying connection works the same way everywhere.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Which keyword tools and data providers are supported?</summary>
+          <div class="faq-body">Today, keyword data comes from Google Ads Keyword Planner, and page performance data comes from Google PageSpeed Insights. Both are queried live through the same server. Additional data providers are on the roadmap for later this year.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Do I need an API key?</summary>
+          <div class="faq-body">Yes. Sign up free to get one — no credit card required for the Free tier. Your key authenticates every request you send through the MCP server, and every call counts against your monthly quota automatically.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I use it with Claude?</summary>
+          <div class="faq-body">Yes — add the server to Claude's MCP configuration with your API key, and you can connect Claude to data directly, calling keyword and PageSpeed tools mid-conversation instead of switching to a separate dashboard.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I use it with ChatGPT?</summary>
+          <div class="faq-body">Yes, anywhere ChatGPT supports external MCP connectors. Once configured, you can connect ChatGPT to data the same way you would with Claude or Cursor — same API key, same three tools, same quota.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Is my keyword data stored?</summary>
+          <div class="faq-body">Lookups are cached by seed term and location to speed up repeat queries, and that cache isn't tied to your account. We only track usage against your monthly request quota, nothing more granular than that.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I build my own MCP tools?</summary>
+          <div class="faq-body">Not yet. Today you get three built-in tools — Keyword Ideas, Historical Keyword Metrics, and PageSpeed Insights — through the same MCP server for AI clients. Custom tool support is on the roadmap.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15. FINAL CTA -->
+  <section class="final-cta" aria-labelledby="final-cta-heading">
+    <div class="container">
+      <h2 id="final-cta-heading">Your AI Already Knows How to Think. Give It Better Data.</h2>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="signup.html">Connect Your Keyword Data →</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">⌁</span> SEO Keyword API</a>
+      <div class="footer-links">
+        <a href="#product">Product</a>
+        <a href="#integrations">Integrations</a>
+        <a href="#developers">Developers</a>
+        <a href="#mcp-tools">Docs</a>
+        <a href="#pricing">Pricing</a>
+        <a href="signup.html">Sign Up</a>
+        <a href="upgrade.html">Upgrade</a>
+      </div>
+    </div>
+    <p class="footer-copy">© 2026 SEO Keyword API. Keyword data from Google Ads Keyword Planner. Page performance data from Google PageSpeed Insights.</p>
+  </div>
+</footer>
+
+<script src="assets/js/script.js" defer></script>
+
+</body>
+</html>
