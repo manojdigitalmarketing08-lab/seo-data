@@ -96,36 +96,51 @@
       <a class="alert-cta" href="upgrade.html">Upgrade →</a>
     </div>
 
+    <div class="app-shell">
+      <!-- Sidebar nav -->
+      <aside class="sidebar">
+        <div class="sidebar-brand" aria-hidden="true">⌁</div>
+        <nav class="sidebar-nav" role="tablist" aria-label="Tools">
+          <button type="button" class="sidebar-nav-btn is-active" id="tabKeywordExplorer" role="tab" aria-selected="true" aria-controls="paneKeywordExplorer" title="Keyword Explorer">
+            <span class="sidebar-nav-icon" aria-hidden="true">&#8981;</span>
+            <span class="sidebar-nav-label">Explorer</span>
+          </button>
+          <button type="button" class="sidebar-nav-btn" id="tabContentBrief" role="tab" aria-selected="false" aria-controls="paneContentBrief" title="Content Brief">
+            <span class="sidebar-nav-icon" aria-hidden="true">&#9776;</span>
+            <span class="sidebar-nav-label">Brief</span>
+          </button>
+        </nav>
+      </aside>
+
+      <div class="main-content">
+
     <!-- Overview -->
     <section class="overview-card">
-      <div class="overview-top">
-        <div>
-          <span class="overview-eyebrow">Current plan</span>
+      <div class="stat-tiles">
+        <div class="stat-tile">
+          <span class="stat-tile-label">Current plan</span>
           <div class="overview-plan">
             <span class="badge" id="planBadge">—</span>
             <span class="badge" id="statusBadge">—</span>
           </div>
         </div>
-      </div>
-
-      <div class="overview-quota">
-        <div class="quota-row">
+        <div class="stat-tile">
+          <span class="stat-tile-label">Requests used</span>
           <span class="quota-figure" id="quotaUsedValue">— / —</span>
-          <span class="quota-caption">requests used this period</span>
+          <span class="stat-tile-sub">this period</span>
         </div>
-        <div class="meter"><div class="meter-fill" id="quotaMeter" style="width:0%"></div></div>
-        <div class="quota-foot">
-          <span><strong id="quotaRemainingValue">—</strong> remaining</span>
-          <span>Resets <strong id="resetValue">—</strong> <span id="resetSub"></span></span>
+        <div class="stat-tile">
+          <span class="stat-tile-label">Remaining</span>
+          <strong class="stat-tile-value" id="quotaRemainingValue">—</strong>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-tile-label">Resets</span>
+          <strong class="stat-tile-value" id="resetValue">—</strong>
+          <span class="stat-tile-sub" id="resetSub"></span>
         </div>
       </div>
+      <div class="meter"><div class="meter-fill" id="quotaMeter" style="width:0%"></div></div>
     </section>
-
-    <!-- Tool tabs -->
-    <div class="tool-tabs" role="tablist" aria-label="Tools">
-      <button type="button" class="tool-tab is-active" id="tabKeywordExplorer" role="tab" aria-selected="true" aria-controls="paneKeywordExplorer">Keyword Explorer</button>
-      <button type="button" class="tool-tab" id="tabContentBrief" role="tab" aria-selected="false" aria-controls="paneContentBrief">Content Brief</button>
-    </div>
 
     <div class="dash-grid">
       <!-- Primary: tool panes -->
@@ -304,6 +319,9 @@
           <div class="empty-state" id="activityEmpty" hidden>No requests yet.</div>
         </section>
       </aside>
+    </div>
+
+      </div>
     </div>
   </div>
 
