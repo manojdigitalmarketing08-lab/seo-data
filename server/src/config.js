@@ -19,6 +19,23 @@ module.exports = {
 
   PAGESPEED_API_KEY: process.env.PAGESPEED_API_KEY || '',
 
+  // Search Console — per-customer OAuth (distinct from the static Google Ads
+  // credential above: GSC data belongs to each customer's own verified
+  // property, so every customer connects their own Google account).
+  GSC_OAUTH_CLIENT_ID: required('GSC_OAUTH_CLIENT_ID'),
+  GSC_OAUTH_CLIENT_SECRET: required('GSC_OAUTH_CLIENT_SECRET'),
+  GSC_OAUTH_REDIRECT_URI: required('GSC_OAUTH_REDIRECT_URI'),
+  GSC_POST_AUTH_REDIRECT_URL: process.env.GSC_POST_AUTH_REDIRECT_URL || '/dashboard.html',
+  OAUTH_STATE_SECRET: required('OAUTH_STATE_SECRET'),
+  TOKEN_ENCRYPTION_KEY: required('TOKEN_ENCRYPTION_KEY'),
+
+  // Optional — powers the "currently ranking" section of /api/content-brief.
+  // Google's Custom Search JSON API is closed to new Cloud projects (confirmed
+  // via live testing against two separate keys/projects — not a config issue,
+  // Google's own new-customer policy), so this uses Serper.dev instead: get a
+  // key at https://serper.dev (2,500 free queries, then pay-as-you-go).
+  SERPER_API_KEY: process.env.SERPER_API_KEY || '',
+
   PADDLE_API_KEY: process.env.PADDLE_API_KEY || '',
   PADDLE_API_BASE: process.env.PADDLE_API_BASE || 'https://sandbox-api.paddle.com',
   PADDLE_WEBHOOK_SECRET: process.env.PADDLE_WEBHOOK_SECRET || '',

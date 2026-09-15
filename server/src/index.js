@@ -14,8 +14,12 @@ const {
 const keywordIdeasRoute = require('./routes/keywordIdeas');
 const historicalMetricsRoute = require('./routes/historicalMetrics');
 const pagespeedRoute = require('./routes/pagespeed');
+const contentBriefRoute = require('./routes/contentBrief');
 const dashboardSearchRoute = require('./routes/dashboardSearch');
+const accountRoute = require('./routes/account');
+const sessionAccountRoute = require('./routes/sessionAccount');
 const paddleWebhookRoute = require('./routes/paddleWebhook');
+const gscRoute = require('./routes/gsc');
 const mcpRoute = require('./routes/mcp');
 const { resetOverdueQuotas } = require('./cron/resetQuotas');
 const { checkRateLimit } = require('./cron/rateLimitMonitor');
@@ -41,10 +45,24 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 app.use('/api/keyword-ideas', gatedToolLimiter, keywordIdeasRoute);
 app.use('/api/historical-metrics', gatedToolLimiter, historicalMetricsRoute);
 app.use('/api/pagespeed', gatedToolLimiter, pagespeedRoute);
+app.use('/api/content-brief', gatedToolLimiter, contentBriefRoute);
 
 // Public dashboard endpoint: open CORS (restrict via ALLOWED_DASHBOARD_ORIGIN once
 // the dashboard frontend has a real domain) + the same per-apiKey limiter.
 app.use('/dashboard-search-keywords', cors(dashboardCorsOptions), gatedToolLimiter, dashboardSearchRoute);
+
+// Dashboard account lookup (plan/quota/usage by apiKey) — same public-CORS +
+// per-apiKey-limiter treatment as the search endpoint above.
+app.use('/api/account', cors(dashboardCorsOptions), gatedToolLimiter, accountRoute);
+
+// Exchanges a Supabase Auth session (email/password login) for the customer's
+// apiKey — same public-CORS + rate-limit treatment as the routes above.
+app.use('/api/session-account', cors(dashboardCorsOptions), gatedToolLimiter, sessionAccountRoute);
+
+// GSC connect/callback are plain browser top-level navigations (not fetch), so CORS
+// is a no-op for them either way; status/sites/disconnect/search-analytics are all
+// dashboard-callable, same public-CORS + per-apiKey-limiter treatment as account.js.
+app.use('/api/gsc', cors(dashboardCorsOptions), gatedToolLimiter, gscRoute);
 
 // The real MCP endpoint documented in index.html's client config — no CORS (MCP
 // clients are not browsers) + the header-based per-apiKey limiter.

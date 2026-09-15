@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — SEO Keyword API</title>
+<meta name="description" content="View your API key, plan, and monthly quota, and try live keyword search — the customer dashboard for SEO Keyword API.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body class="dashboard-body">
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">⌁</span> SEO Keyword API</a>
+    <div class="topbar-actions">
+      <div class="dev-menu" id="devMenu" hidden>
+        <button type="button" class="btn-ghost" id="devMenuBtn" aria-expanded="false" aria-haspopup="true">Developer</button>
+        <div class="dev-dropdown" id="devDropdown" hidden>
+          <div class="dev-dropdown-section">
+            <span class="dev-dropdown-label">API key</span>
+            <div class="key-pill">
+              <span id="keyPillText">••••••••••••</span>
+              <button type="button" class="btn-ghost" id="revealKeyBtn">Reveal</button>
+              <button type="button" class="btn-ghost" id="copyKeyBtn">Copy</button>
+            </div>
+          </div>
+          <div class="dev-dropdown-section">
+            <span class="dev-dropdown-label">Connect via MCP</span>
+            <p class="panel-sub">Add this to Claude, ChatGPT, Cursor, or any MCP-compatible client — your key is already filled in.</p>
+            <div class="code-block">
+              <button class="btn-copy" type="button" data-copy-target="mcpSnippet">Copy</button>
+              <pre id="mcpSnippet"></pre>
+            </div>
+          </div>
+          <div class="dev-dropdown-section">
+            <span class="dev-dropdown-label">Search Console</span>
+            <p class="panel-sub" id="gscNotConnected">Connect your Google Search Console property to unlock query/ranking data in Content Brief and the API.</p>
+            <p class="panel-sub" id="gscConnected" hidden>Connected as <strong id="gscEmail"></strong></p>
+            <button type="button" class="btn btn-outline" id="gscConnectBtn">Connect Search Console</button>
+            <button type="button" class="btn-ghost" id="gscDisconnectBtn" hidden>Disconnect</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn-ghost" id="signOutBtn" hidden>Switch key</button>
+      <a class="btn btn-outline" href="upgrade.html">Upgrade</a>
+    </div>
+  </div>
+</header>
+
+<main class="dash-main">
+
+  <!-- ============ GATE: enter API key ============ -->
+  <section class="gate-wrap" id="gateWrap">
+    <div class="gate-card">
+      <h1>Sign in with your API key</h1>
+      <p class="lede">Paste the key from your signup confirmation to view your usage and run a live keyword search.</p>
+
+      <div class="alert alert-danger" id="gateError" role="alert" hidden>
+        <span id="gateErrorText"></span>
+      </div>
+
+      <form id="gateForm" novalidate>
+        <div class="gate-field">
+          <label for="apiKeyInput">API key</label>
+          <input type="text" id="apiKeyInput" name="apiKey" autocomplete="off" spellcheck="false" placeholder="8f3a1c9b2e7d4f6a…" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="gateSubmit">Continue</button>
+      </form>
+
+      <p class="gate-foot">No key yet? <a href="signup.html">Get one free</a> · <a href="dashboard.html?demo=1">view a demo</a></p>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD (shown once a key is verified) ============ -->
+  <div class="container" id="dashRoot" hidden>
+
+    <div class="alert alert-success" id="gscConnectBanner" role="status" hidden>
+      <span>Search Console connected.</span>
+    </div>
+    <div class="alert alert-danger" id="gscErrorBanner" role="alert" hidden>
+      <span>Couldn't connect Search Console. Try again from the Developer menu.</span>
+    </div>
+
+    <div class="alert alert-danger" id="suspendedAlert" hidden>
+      <span>Subscription status: <strong id="statusText"></strong> — gated tools are paused. <a href="upgrade.html">Manage billing</a></span>
+    </div>
+
+    <div class="alert alert-warning" id="quotaAlert" hidden>
+      <span><strong id="quotaAlertText"></strong> used this month.</span>
+      <a class="alert-cta" href="upgrade.html">Upgrade →</a>
+    </div>
+
+    <!-- Overview -->
+    <section class="overview-card">
+      <div class="overview-top">
+        <div>
+          <span class="overview-eyebrow">Current plan</span>
+          <div class="overview-plan">
+            <span class="badge" id="planBadge">—</span>
+            <span class="badge" id="statusBadge">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview-quota">
+        <div class="quota-row">
+          <span class="quota-figure" id="quotaUsedValue">— / —</span>
+          <span class="quota-caption">requests used this period</span>
+        </div>
+        <div class="meter"><div class="meter-fill" id="quotaMeter" style="width:0%"></div></div>
+        <div class="quota-foot">
+          <span><strong id="quotaRemainingValue">—</strong> remaining</span>
+          <span>Resets <strong id="resetValue">—</strong> <span id="resetSub"></span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tool tabs -->
+    <div class="tool-tabs" role="tablist" aria-label="Tools">
+      <button type="button" class="tool-tab is-active" id="tabKeywordExplorer" role="tab" aria-selected="true" aria-controls="paneKeywordExplorer">Keyword Explorer</button>
+      <button type="button" class="tool-tab" id="tabContentBrief" role="tab" aria-selected="false" aria-controls="paneContentBrief">Content Brief</button>
+    </div>
+
+    <div class="dash-grid">
+      <!-- Primary: tool panes -->
+      <div class="tool-panes">
+
+        <!-- Pane: Keyword Explorer -->
+        <section class="panel panel-primary tool-pane" id="paneKeywordExplorer" role="tabpanel">
+          <h2>Keyword Explorer</h2>
+          <p class="panel-sub">Live search against Google Ads Keyword Planner — cached and counted against your quota.</p>
+
+          <form class="tool-form" id="searchForm">
+            <div class="field">
+              <label for="seedKeywords">Seed keywords</label>
+              <input type="text" id="seedKeywords" name="seedKeywords" placeholder="photobooth software, event rentals" required>
+            </div>
+            <div class="field">
+              <label for="location">Location</label>
+              <select id="location" name="location">
+                <option value="india" selected>India</option>
+                <option value="united states">United States</option>
+                <option value="united kingdom">United Kingdom</option>
+                <option value="canada">Canada</option>
+                <option value="australia">Australia</option>
+                <option value="germany">Germany</option>
+                <option value="global">Global</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="searchSubmit">Search</button>
+          </form>
+
+          <div class="tool-status" id="searchStatus" hidden>
+            <span class="spinner-sm" aria-hidden="true"></span>
+            <span id="searchStatusText">Querying Google Ads Keyword Planner…</span>
+          </div>
+
+          <div class="alert alert-danger" id="searchError" role="alert" hidden>
+            <span id="searchErrorText"></span>
+          </div>
+
+          <div class="results-wrap" id="resultsWrap" hidden>
+            <div class="results-meta">
+              <span class="source-badge" id="sourceBadge"></span>
+              <span id="resultCount"></span>
+            </div>
+            <div class="table-scroll">
+              <table class="keyword-table">
+                <thead>
+                  <tr><th scope="col">Keyword</th><th scope="col">Avg. monthly searches</th><th scope="col">Competition</th></tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="empty-state" id="resultsEmpty">Run a search to see keyword ideas here.</div>
+        </section>
+
+        <!-- Pane: Content Brief -->
+        <section class="panel panel-primary tool-pane" id="paneContentBrief" role="tabpanel" hidden>
+          <h2>Content Brief</h2>
+          <p class="panel-sub">Turn a topic into a scored, clustered keyword set and a ready-to-use page outline — not just raw keyword data.</p>
+
+          <form class="tool-form tool-form-brief" id="briefForm">
+            <div class="field">
+              <label for="briefTopic">Page topic</label>
+              <input type="text" id="briefTopic" name="topic" placeholder="project management software" required>
+            </div>
+            <div class="field">
+              <label for="briefLocation">Location</label>
+              <select id="briefLocation" name="location">
+                <option value="india" selected>India</option>
+                <option value="united states">United States</option>
+                <option value="united kingdom">United Kingdom</option>
+                <option value="canada">Canada</option>
+                <option value="australia">Australia</option>
+                <option value="germany">Germany</option>
+                <option value="global">Global</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="briefIntent">Page intent</label>
+              <select id="briefIntent" name="intent">
+                <option value="" selected>Not specified</option>
+                <option value="informational">Informational</option>
+                <option value="commercial">Commercial</option>
+                <option value="transactional">Transactional</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="briefSubmit">Generate brief</button>
+          </form>
+
+          <div class="tool-status" id="briefStatus" hidden>
+            <span class="spinner-sm" aria-hidden="true"></span>
+            <span id="briefStatusText">Scoring keyword opportunities and checking live rankings…</span>
+          </div>
+
+          <div class="alert alert-danger" id="briefError" role="alert" hidden>
+            <span id="briefErrorText"></span>
+          </div>
+
+          <div class="brief-results" id="briefResults" hidden>
+            <div class="results-meta">
+              <span class="source-badge" id="briefSourceBadge"></span>
+              <span id="briefSummary"></span>
+            </div>
+
+            <!-- Primary recommendation -->
+            <div class="brief-hero">
+              <span class="brief-hero-eyebrow">Recommended primary keyword</span>
+              <div class="brief-hero-keyword" id="briefPrimaryKeyword">—</div>
+              <div class="brief-hero-stats" id="briefPrimaryStats"></div>
+            </div>
+
+            <!-- SEO snippet preview -->
+            <div class="brief-snippet">
+              <div class="brief-snippet-title" id="briefTitleTag">—</div>
+              <div class="brief-snippet-desc" id="briefMetaDescription">—</div>
+            </div>
+
+            <!-- Outline -->
+            <div class="brief-section">
+              <h3>Page outline</h3>
+              <div class="brief-outline-h1"><span class="brief-tag">H1</span> <span id="briefH1"></span></div>
+              <ul class="brief-outline-list" id="briefH2List"></ul>
+            </div>
+
+            <!-- FAQ -->
+            <div class="brief-section" id="briefFaqSection">
+              <h3>FAQ candidates</h3>
+              <ul class="brief-outline-list" id="briefFaqList"></ul>
+            </div>
+
+            <!-- Currently ranking -->
+            <div class="brief-section" id="briefRankingSection">
+              <h3>Currently ranking</h3>
+              <div class="brief-ranking-grid" id="briefRankingGrid"></div>
+            </div>
+
+            <!-- Excluded brand terms -->
+            <div class="brief-section" id="briefExcludedSection" hidden>
+              <h3>Excluded as branded/competitor terms</h3>
+              <div class="brief-tag-list" id="briefExcludedList"></div>
+            </div>
+
+            <!-- Full cluster table -->
+            <details class="brief-details" id="briefClustersDetails">
+              <summary>Full keyword cluster table</summary>
+              <div class="table-scroll">
+                <table class="keyword-table">
+                  <thead>
+                    <tr><th scope="col">Keyword</th><th scope="col">Avg. monthly searches</th><th scope="col">Competition</th><th scope="col">Opportunity</th></tr>
+                  </thead>
+                  <tbody id="briefClustersBody"></tbody>
+                </table>
+              </div>
+              <p class="brief-clusters-note" id="briefClustersNote"></p>
+            </details>
+
+            <!-- Known limitations -->
+            <details class="brief-details">
+              <summary>Known limitations</summary>
+              <ul class="brief-limitations-list" id="briefLimitationsList"></ul>
+            </details>
+          </div>
+
+          <div class="empty-state" id="briefEmpty">Enter a topic to generate a content brief.</div>
+        </section>
+
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="dash-side">
+        <section class="panel">
+          <h2>Recent activity</h2>
+          <ul class="activity-list" id="activityList"></ul>
+          <div class="empty-state" id="activityEmpty" hidden>No requests yet.</div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+</main>
+
+<script src="assets/js/dashboard.js" defer></script>
+</body>
+</html>

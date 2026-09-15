@@ -3,6 +3,8 @@ const { z } = require('zod');
 const { runGatedTool, GateError } = require('../gatedTool');
 const { generateKeywordIdeas, generateHistoricalMetrics } = require('../googleAds');
 const { runPagespeed } = require('../pagespeed');
+const { buildContentBrief } = require('../contentBrief/buildBrief');
+const { getGscSearchAnalytics } = require('../gsc/searchAnalyticsService');
 
 // MCP tool results report failures inside the JSON-RPC result (isError: true),
 // not as an HTTP-level error — the connection/auth itself is fine, the *call* failed.
@@ -112,6 +114,69 @@ function buildMcpServer(apiKey) {
           toolName: 'Get_PageSpeed_Insights',
           callApi: () => runPagespeed(url, strategy)
         });
+        return toolOk(out);
+      } catch (err) {
+        return toolError(err);
+      }
+    }
+  );
+
+  server.registerTool(
+    'get_content_brief',
+    {
+      title: 'Get Content Brief',
+      description:
+        'Turn a topic into a scored, clustered keyword opportunity set and a page outline (title, H1, H2s, FAQ), with live SERP context for the primary and secondary keywords. Answers "what should this page target and how should it be structured", not just raw keyword data.',
+      inputSchema: {
+        topic: z.string().describe('Page topic or working title, e.g. "project management software"'),
+        country: z.string().optional().describe('Target location, e.g. "United States" or "India" (default: India)'),
+        intent: z
+          .enum(['informational', 'commercial', 'transactional'])
+          .optional()
+          .describe('Page intent — drops commercial-intent seeds (pricing, buy) for informational pages')
+      }
+    },
+    async ({ topic, country, intent }) => {
+      const loc = (country || 'india').toLowerCase().trim();
+      const cacheKey = `brief::${loc}::${topic.trim().toLowerCase()}::${(intent || '').toLowerCase()}`;
+      try {
+        const out = await runGatedTool({
+          apiKey,
+          cacheKey,
+          cacheLabel: topic,
+          cacheLocation: country || 'India',
+          toolName: 'Get_Content_Brief',
+          callApi: () => buildContentBrief({ topic, location: country, intent })
+        });
+        return toolOk(out);
+      } catch (err) {
+        return toolError(err);
+      }
+    }
+  );
+
+  server.registerTool(
+    'get_gsc_search_analytics',
+    {
+      title: 'Get GSC Search Analytics',
+      description:
+        "Query the caller's connected Google Search Console property for queries, impressions, clicks, CTR, and position. " +
+        'Requires the customer to have connected a Search Console account first (via GET /api/gsc/connect) — returns a ' +
+        "GSC_NOT_CONNECTED error otherwise. Always live data, not cached, since GSC's own data updates daily.",
+      inputSchema: {
+        siteUrl: z.string().describe('The verified GSC property, e.g. "https://example.com/" or "sc-domain:example.com"'),
+        startDate: z.string().describe('Start date, YYYY-MM-DD'),
+        endDate: z.string().describe('End date, YYYY-MM-DD'),
+        dimensions: z
+          .array(z.enum(['query', 'page', 'country', 'device', 'date']))
+          .optional()
+          .describe('Dimensions to break results down by (default: ["query"])'),
+        rowLimit: z.number().optional().describe('Max rows to return (default: 100)')
+      }
+    },
+    async ({ siteUrl, startDate, endDate, dimensions, rowLimit }) => {
+      try {
+        const out = await getGscSearchAnalytics({ apiKey, siteUrl, startDate, endDate, dimensions, rowLimit });
         return toolOk(out);
       } catch (err) {
         return toolError(err);

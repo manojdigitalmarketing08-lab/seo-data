@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>Get your API key — SEO Keyword API</title>
 <meta name="description" content="Generate a free API key for the SEO Keyword API — programmatic access to Google Ads Keyword Planner and PageSpeed Insights.">
 <meta property="og:title" content="SEO Keyword API — Get your API key">
@@ -457,8 +458,8 @@
   <section class="panel-form" id="panelForm">
 
     <div class="signup-view">
-      <h2>Get your API key</h2>
-      <p class="lede">Enter your email and we'll generate a free-tier key instantly — no password, no card.</p>
+      <h2>Create your account</h2>
+      <p class="lede">Set an email and password to log in to your dashboard anytime — plus an instant free-tier API key, no card required.</p>
 
       <div id="formMessage" class="form-message is-error" role="alert"></div>
 
@@ -475,11 +476,24 @@
           >
         </div>
 
+        <div class="field">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            autocomplete="new-password"
+            placeholder="At least 8 characters"
+            minlength="8"
+            required
+          >
+        </div>
+
         <button type="submit" class="btn-primary" id="submitBtn">
-          <span id="submitLabel">Get my API key</span>
+          <span id="submitLabel">Create account</span>
         </button>
 
-        <p class="privacy-note">We only use this to identify your account — no spam, ever.</p>
+        <p class="privacy-note">We only use your email to identify your account — no spam, ever. <a href="login.html">Already have an account?</a></p>
       </form>
     </div>
 
@@ -490,6 +504,11 @@
       <div class="warning-line">
         <span aria-hidden="true">⚠</span>
         <span>Save this now. For your security, we can't show this key again.</span>
+      </div>
+
+      <div class="warning-line" style="background:var(--success-bg); color:#166534; border-color:#BBF7D0;">
+        <span aria-hidden="true">✉</span>
+        <span>We've sent a confirmation link to your email. Your API key below works right away, but you'll need to confirm your email before you can log in to the dashboard with your password.</span>
       </div>
 
       <div class="key-box">
@@ -504,6 +523,7 @@
         <code>Get Keyword Ideas</code>, <code>Get Historical Keyword Metrics</code>, or <code>Get PageSpeed Insights</code>.
       </p>
 
+      <a class="btn-primary" style="display:flex; text-decoration:none; margin-top:var(--space-2);" href="dashboard.html">Go to dashboard →</a>
       <button type="button" class="link-btn" id="resetBtn">Sign up another account</button>
     </div>
 
@@ -520,6 +540,7 @@
 
   var form = document.getElementById('signupForm');
   var emailInput = document.getElementById('email');
+  var passwordInput = document.getElementById('password');
   var submitBtn = document.getElementById('submitBtn');
   var submitLabel = document.getElementById('submitLabel');
   var formMessage = document.getElementById('formMessage');
@@ -554,9 +575,9 @@
       spinner.className = 'spinner';
       spinner.setAttribute('aria-hidden', 'true');
       submitLabel.appendChild(spinner);
-      submitLabel.appendChild(document.createTextNode(' Creating your key…'));
+      submitLabel.appendChild(document.createTextNode(' Creating your account…'));
     } else {
-      submitLabel.textContent = 'Get my API key';
+      submitLabel.textContent = 'Create account';
     }
   }
 
@@ -569,25 +590,56 @@
     clearError();
 
     var email = emailInput.value.trim();
+    var password = passwordInput.value;
     emailInput.setAttribute('data-touched', 'true');
+    passwordInput.setAttribute('data-touched', 'true');
 
     if (!isValidEmail(email)) {
       showError('Enter a valid email address.');
       emailInput.focus();
       return;
     }
+    if (!password || password.length < 8) {
+      showError('Password must be at least 8 characters.');
+      passwordInput.focus();
+      return;
+    }
 
     setLoading(true);
 
-    fetch(SUPABASE_URL + '/rest/v1/rpc/signup_customer', {
+    // 1) Create the Supabase Auth user (email/password), so this account can log
+    //    in later via login.html — independent of the apiKey issued below.
+    fetch(SUPABASE_URL + '/auth/v1/signup', {
       method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ customer_email: email })
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
     })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (authResult) {
+        if (!authResult.ok) {
+          var authMsg = (authResult.data && (authResult.data.msg || authResult.data.error_description || authResult.data.error)) || '';
+          if (/registered|exists/i.test(authMsg)) {
+            throw { handled: true, message: 'An account with this email already exists. Log in instead.' };
+          }
+          throw { handled: true, message: authMsg || 'Could not create your account. Please try again.' };
+        }
+
+        // 2) Create the customer row + api_key, same RPC as before — unaffected
+        //    by whether Supabase requires email confirmation before login.
+        return fetch(SUPABASE_URL + '/rest/v1/rpc/signup_customer', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ customer_email: email })
+        });
+      })
       .then(function (res) {
         return res.json().then(function (data) {
           return { ok: res.ok, data: data };
@@ -618,14 +670,20 @@
         planLine.innerHTML = 'Plan: <strong>' + escapeHtml(row.plan) + '</strong> · ' +
           escapeHtml(String(row.monthly_quota)) + ' requests / month';
 
+        try { localStorage.setItem('seoKeywordApi.apiKey', row.api_key); } catch (e) { /* no-op */ }
+
         panelForm.classList.add('showing-success');
         successView.classList.add('is-visible');
         announce('Account created. Your API key is ready.');
         successView.querySelector('h2').setAttribute('tabindex', '-1');
         successView.querySelector('h2').focus();
       })
-      .catch(function () {
+      .catch(function (err) {
         setLoading(false);
+        if (err && err.handled) {
+          showError(err.message);
+          return;
+        }
         showError('Network error — check your connection and try again.');
       });
   });

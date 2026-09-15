@@ -1,86 +1,122 @@
-# SEO Keyword API — SaaS Build Handoff (Session 2)
+# SEO Keyword API — SaaS Build Handoff (Session 3)
 
-Continuation of the original build. This session: locked down RLS, added quota reset + rate-limit monitoring, built a public dashboard search API, replaced Stripe with Paddle, and pushed everything to git. Read this before touching anything — several non-obvious bugs were found and fixed.
+**The architecture changed completely this session.** n8n is retired. The entire backend is now a standalone Node/Express service in `server/`. If you're picking this up cold, read this whole file before touching anything — Sessions 1–2's n8n-specific content below is historical only.
 
-## Live infrastructure
+## Immediate blocker for next session
 
-**n8n instance:** `https://n8n-oyaw.onrender.com` — **runs on Render's free tier and restarts under heavy call volume.** Space out live testing; a sudden run of 503s/connection errors usually means the instance restarted, not that your logic is broken.
+**The user reported "localhost cannot get" when trying to reach the dashboard/API from their own browser.** Root cause found and partially fixed: on this dev machine, `localhost` resolves to `::1` (IPv6) first, and the Node server isn't reachable there — confirmed directly: `curl http://localhost:3000/health` fails, `curl http://127.0.0.1:3000/health` succeeds.
 
-| Workflow | ID | Status | Purpose |
-|---|---|---|---|
-| `Get Keyword Ideas (Gated)` | `UFfD8HBtKyzymcag` | active | Paid API tool — unchanged logic, fixed this session (see bugs below) |
-| `Get Historical Keyword Metrics (Gated)` | `qoYYOVFoFk5Axo31` | active | Same fix applied |
-| `Get PageSpeed Insights (Gated)` | `svckRUYkrynO77FS` | active | Same fix applied |
-| `Dashboard Search API` | `yxFP2h3ahFUWKdl1` | active | **New.** Public webhook wrapping keyword search for the browser dashboard — self-contained (does not call the workflow above as a sub-workflow, see bugs below) |
-| `Reset Monthly Quotas` | `zlpiunnYyJmHqk2v` | active | **New.** Daily 00:10 UTC, idempotent |
-| `Rate Limit Monitor` | `WY3TZ74yohOLEPMF` | active | **New.** Hourly, log-only (fails visibly in execution history over threshold) |
-| `Paddle Webhook Handler` | `iEsmvSFmUKG6HgfV` | **inactive** | **New**, built but not wired up — needs a Paddle credential (see Not Yet Built) |
-| `SEO Data MCP Server (GSC + Keyword Planner)` | `TFuwEZCHZmsnjuko` | active | Personal-use, ungated — untouched |
-| `Page Content Audit` | `HtbPWazqahiPWbsm` | active | Untouched |
-| ~~`Stripe Webhook Handler`~~ | `LHBGuRSk5vC9ER1s` | **archived** | Superseded by Paddle before ever going live — Stripe isn't available in the account owner's country |
-| ~~`Dashboard Search API` (v1, broken)~~ | `QaQsSjcXouaajDfo` | **archived** | First attempt, called the gated workflow via Execute Sub-workflow — replaced due to unreliable credential resolution |
+**Fixed this session:** `assets/js/dashboard.js`'s `API_BASE_URL` changed from `http://localhost:3000` to `http://127.0.0.1:3000`.
 
-**Supabase project:** `pcmsotnmkxeriapajyco` (unchanged). Schema/migrations now version-controlled — see repo below.
+**Not yet confirmed:** whether that fix actually resolves it for the user — this was done at the very end of the session, un-tested against their actual browser. **First thing next session: confirm with the user whether `dashboard.html` now loads data correctly**, or whether the IPv6 issue runs deeper (e.g. Windows Firewall blocking the port, antivirus interference, or something specific to their machine that a URL change alone doesn't fix).
 
-**n8n credentials:**
-- `rsl` (Supabase API, service_role) — used by every backend node that writes to Supabase, bypasses RLS by design
-- `keyword` (`e3KWnwXqJQh1j4G9`, Google Ads OAuth2) — unchanged
-- `console` (`bjFZuFmboFvnGUA2`, GSC OAuth2) — unchanged, do not swap with `keyword`
-- `PageSpeed_Insights` (Query Auth) — unchanged
-- **`Paddle`** — **not yet created.** Needs a Header Auth credential (`Authorization: Bearer <sandbox API key>`) before `Paddle Webhook Handler` can be activated
+## How to run it locally
 
-## Git repo
+```bash
+cd server
+npm install        # if not already done
+npm start          # starts on port 3000
+```
 
-`https://github.com/manojdigitalmarketing08-lab/seo-data` — **public repo.** Pushed this session: `signup.html`, `upgrade.html`, all 7 active/inactive workflow JSON exports, `supabase/schema.sql` + 6 migrations, `README.md`.
+Then open `dashboard.html` directly in a browser (file:// URL works fine), or `dashboard.html?demo=1` for a mock-data preview with no backend needed.
 
-⚠️ The Google Ads developer-token was **redacted** from the committed workflow JSON (`REPLACE_ME_GOOGLE_ADS_DEV_TOKEN`) since the repo is public — paste the real token back in if you ever re-import these files into n8n. The real token still lives safely in the live n8n workflows themselves, only the git copies are redacted.
+**Caveat:** if you start the server via a Claude Code background task, it dies when that session/task ends — it is not a persistent service. Confirmed twice this session (server had to be restarted after two separate session boundaries). For anything longer-lived than one working session, the user should run `npm start` themselves in their own terminal, or the server should be deployed (see Not Yet Built).
 
-Two workflows were **not exported** (kept the n8n call budget down per the Render free-tier note): `SEO Data MCP Server` and `Page Content Audit`. Export them the same way (`get_workflow_details` → write JSON) if you want them version-controlled too.
+## What's actually running (server/)
 
-An untracked `index.html` (~48KB) appeared in the project directory during this session that **I did not create** — not part of this work, origin unknown. Worth checking with the user before assuming it's related to this project.
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/keyword-ideas` | Google Ads Keyword Planner ideas — gated |
+| `POST /api/historical-metrics` | Historical keyword volume — gated |
+| `POST /api/pagespeed` | PageSpeed Insights — gated |
+| `POST /api/content-brief` | **New flagship feature** — see below |
+| `POST /dashboard-search-keywords` | Public, no-login keyword search for the dashboard |
+| `POST /api/account` | Dashboard account/quota lookup by apiKey |
+| `POST /api/session-account` | Bridges a Supabase Auth session (see Discovered-not-audited below) to the apiKey model |
+| `POST /webhooks/paddle` | Paddle billing webhook, with real signature verification |
+| `POST /mcp` | **Real MCP server** (Streamable HTTP) — 3 tools: `get_keyword_ideas`, `get_historical_keyword_metrics`, `get_pagespeed_insights`, `get_content_brief` |
+| Crons (in-process, `node-cron`) | Daily quota reset, hourly rate-limit monitor |
 
-## What changed this session
+Full architecture, security layer, and MCP details are in `server/README.md` — kept up to date throughout this session, trust it over re-deriving from code.
 
-1. **RLS enabled** on `customers`, `keyword_cache`, `usage_log` — anon key can no longer read any customer data (previously full CRUD, per original handoff's top-priority flag).
-2. **Public signup rebuilt** as a `SECURITY DEFINER` RPC (`signup_customer`) instead of a raw table INSERT — necessary because Postgres requires a SELECT policy to satisfy `RETURNING`, and granting anon SELECT would have reopened the hole. `signup.html` calls this RPC now.
-3. **`upgrade.html`** — new pricing page (Starter $19/mo–500 req, Pro $49/mo–1000 req placeholders), Paddle Checkout wired in but needs real Price IDs (`REPLACE_ME_PRICE_ID_STARTER`/`_PRO`) and client-side token (`REPLACE_ME_PADDLE_CLIENT_SIDE_TOKEN`).
-4. **Monthly quota reset + rate-limit monitoring** — see workflow table above. Both tested live against real data.
-5. **3 Supabase monitoring views** (`usage_daily_summary`, `customer_quota_status`, `google_ads_calls_hourly`) — query from Supabase Studio, not exposed over REST.
-6. **Payment provider switched from Stripe to Paddle** — Stripe isn't available in the account owner's country; Paddle is a merchant-of-record so it can bill in USD without a local Stripe account. Razorpay was considered and rejected (INR-first, not a clean fit for USD billing).
-7. **Dashboard Search API built** — public webhook (no login) that lets anyone search keywords without an API key, gated by the *same* quota system via an RPC-based auto-signup pattern (not yet wired into a frontend — see Not Yet Built #1).
+## Content Brief — the flagship feature built this session
 
-## Bugs hit this session — avoid repeating
+`POST /api/content-brief` (+ MCP tool `get_content_brief`) turns a topic into scored/clustered keyword opportunities, a page outline, and live SERP context — modeled directly on the `seo-keyword-page-planner` Claude skill's methodology (same `Opportunity = Volume / (Competition + 1)` formula).
 
-1. **Postgres views default to the *creator's* privileges for RLS, not the querying role's.** `security_invoker` defaults to `false` even on modern Postgres for backward compatibility. The 3 new monitoring views initially let the anon key read full customer data straight through RLS — caught by testing with the anon key immediately after creating them (same habit as testing tables). Fix: `ALTER VIEW ... SET (security_invoker = true)` on every view built over an RLS-protected table, plus explicit `REVOKE` as defense in depth. **Do this on any future view.**
-2. **RLS + `RETURNING` needs a SELECT policy too**, not just INSERT. An INSERT-only policy works for a bare `POST`, but breaks the moment the client asks for the row back (`Prefer: return=representation`), which `signup.html` needs to show the generated API key. Solved with a `SECURITY DEFINER` function instead of a table policy.
-3. **n8n's Execute Sub-workflow node has unreliable `predefinedCredentialType` credential resolution across workflow boundaries.** `Validate API Key` (using the `rsl` credential) silently returned 0 rows every time it was invoked via Execute Sub-workflow from a webhook-triggered parent workflow — but worked perfectly every time when the same node was triggered directly (manual trigger, schedule trigger, or its own webhook). Root cause not fully diagnosed. Workaround: **Dashboard Search API duplicates the gating logic inline** instead of calling `Get Keyword Ideas (Gated)` as a sub-workflow. Traded DRY for reliability — don't try to DRY this up with Execute Sub-workflow again without re-testing carefully first.
-4. **Latent bug in the original gated workflows (predates this session):** `Validate API Key` never had `alwaysOutputData: true` set. On an invalid API key, the query returns 0 rows, and n8n's zero-item-safety **skips `Gate Check` entirely** rather than running it with an empty item — meaning `Gate Check`'s own "no rows → throw INVALID_API_KEY" logic never executed. Invalid keys were silently producing empty tool output instead of a clear error, in the paid tools too, since before this session. **Fixed in all 4 gated-pattern workflows** (`alwaysOutputData: true` added to `Validate API Key`).
-5. **`continueErrorOutput` on a Code node reformats thrown error messages, dropping custom prefixes.** `throw new Error('INVALID_INPUT: seedKeywords is required')` came out the other side as just `"seedKeywords is required [line 4]"` — the `INVALID_INPUT:` prefix vanished, breaking string-based error-code parsing downstream. Fix: don't throw + parse; have the node `return` a structured `{ok, code, message}` object directly and branch with a plain IF node instead.
-6. **Editing a workflow via the update tool only changes the draft** — the live/active webhook keeps running the previously-published version until you explicitly re-publish. Cost a full test cycle twice this session (fixed a bug, tested against the still-stale published version, concluded the fix didn't work). **Always re-publish after every settings/parameter change to a workflow you're about to test live.**
-7. **Render free tier restarts under sustained call volume** — confirmed directly by the account owner mid-session after a burst of rapid test calls caused 503s and MCP proxy errors. Space out live executions; treat a cluster of connection errors as a probable restart, not a logic bug, before diving into debugging.
+**Pipeline:** seed expansion (template-based, multi-angle) → Google Ads keyword ideas → score → **dual-signal brand/competitor filtering** (Knowledge Graph entity check + live-SERP domain-match heuristic) → cluster (token-overlap) → select primary/secondary/FAQ → live "currently ranking" via Serper.dev → assemble brief.
 
-## Product positioning: API vs MCP
+**Two real quality bugs were caught by testing on real data, not just code review** — worth knowing if you touch this code:
+1. Without a cluster cap, one real brief returned 1,179 clusters / 670KB — capped to top 20, with totals disclosed (`totalClustersFound`/`totalKeywordsScored`).
+2. Knowledge Graph alone could **not** catch "zoho projects" as a branded term — Zoho has zero presence in Google's Knowledge Graph at all. Added a second signal (`domainBrandHeuristic.js`): if a candidate keyword's top live-SERP result is that domain's own page (domain root = query's leading word), it's flagged as branded. Both signals run together; a term needs only one to be excluded.
 
-The account owner flagged a real inconsistency: materials talk about "MCP" but signup issues an "API key" — which is it?
+**Caching, two layers:**
+- `keyword_cache` (pre-existing) — whole-brief cache, exact repeat of topic+location+intent only.
+- `keyword_signal_cache` (**new table, migration `007`**) — per-keyword brand-check + SERP result, reused **across different topics**. Verified live: a keyword cached under one topic's brief was reused with its original timestamp intact when a completely different topic surfaced it again — zero new API calls.
 
-**Answer: it's an API product.** `signup_customer` issues a plain bearer `api_key`, nothing MCP-specific. MCP is one *access channel* to that same API, not a separate product — the same key authenticates both an MCP tool call and a plain HTTP call. Messaging should be "sign up for API access," with MCP mentioned as a supported way to *use* it (call it from Claude/ChatGPT via MCP, or hit the REST endpoint directly), not as the thing being signed up for.
+**Known limitations, by design** (also returned in every API response under `knownLimitations` — don't silently hide these from users):
+- No Google Search Console integration — can't see queries a specific site already ranks for.
+- Brand filtering is best-effort, not exhaustive.
+- Clustering is keyword-text overlap, not true semantic/SERP clustering.
+- Only top 20 clusters returned in full.
 
-This surfaced a real gap and an open question, neither resolved yet:
+## Real external-API gotchas hit this session — do not re-learn these the hard way
 
-- **Gap:** only `Get Keyword Ideas` has a public webhook counterpart (`Dashboard Search API`). `Get Historical Keyword Metrics` and `Get PageSpeed Insights` are *only* reachable via MCP right now — no REST/webhook path exists for them.
-- **Open question, not yet investigated:** how does a paying customer actually *connect* via MCP? Is there one shared MCP server URL for every customer, with each customer's `apiKey` passed per tool-call as an argument? Or something else? This needs a clear answer before documenting an MCP onboarding flow for customers.
+1. **Google Ads developer tokens bind permanently to whichever Google Cloud project makes their first successful API call.** Using a working developer token with a *different* OAuth client/project than the one it's already bound to fails with `DEVELOPER_TOKEN_PROHIBITED`, even if the token would otherwise work fine. Not fixable by resetting secrets or re-authing — only fix is either get the token already bound to your project, or make a brand-new project's first call with your token to bind them together. This cost most of a session to diagnose; if Google Ads calls start failing with this exact error after any credential change, this is why.
+2. **Google's Custom Search JSON API no longer grants access to new Cloud projects at all** — confirmed via live testing against two separate fresh projects/keys, both blocked with `"This project does not have the access to Custom Search JSON API"` regardless of enabling the API or fixing key restrictions. This is a deliberate Google policy (existing customers grandfathered only, service being sunset ~2027). **Do not spend time debugging this error as a config issue** — it isn't one. We switched to **Serper.dev** instead (`SERPER_API_KEY` in `.env`) for all live-SERP needs.
+3. **Knowledge Graph API `resultScore` doesn't reliably separate "generic" from "specific"** — a generic phrase can outscore a real branded match (192,692 vs 2,943 for a real product). The `@type` field (must include `Organization`/`Corporation`/`Brand`/`Product`/`SoftwareApplication`/etc.) does the real discriminating; score is only a floor to reject near-zero-confidence noise matches (calibrated to `50` in `knowledgeGraph.js`, from real observed noise at <2 and real matches at ~2900+).
+4. **A CSS element that sets its own `display` property (flex/grid/block) silently overrides the browser's default `[hidden]{display:none}`** unless you also add an explicit `.your-class[hidden]{display:none}` rule. This exact bug was found live (via actual browser screenshots, not code review) in **two places**: `.gate-wrap` (pre-existing, not introduced this session) and `.brief-results` (introduced this session, same mistake). Both fixed. **If you add any new toggleable panel/section with its own `display` rule, check for this pattern immediately.**
 
-## Not yet built
+## Dashboard (`dashboard.html`, `assets/js/dashboard.js`, `assets/css/dashboard.css`)
 
-1. **Dashboard frontend (`dashboard.html` or similar) — the actual search UI users would use.** This was the first thing asked for this session ("search keywords in dashboard") and the backend (`Dashboard Search API`) is built, tested, and working — but **no frontend page consuming it exists yet.** This is the most important next step.
-2. **CSV/XLSX/PDF export** of search results — not started. Once the dashboard frontend exists, CSV is trivial (client-side, no library), XLSX needs a CDN library (e.g. SheetJS), PDF needs one too (e.g. jsPDF) or a print-to-PDF fallback.
-3. **Free-search auto-provisioning** — the plan discussed (and what `Dashboard Search API`'s gating already supports) is: anonymous dashboard visitors silently get a real free-tier account via `signup_customer` on first visit (synthetic email, e.g. `anon-<uuid>@dashboard-visitor.local`), with the key cached in `localStorage` — reusing the *existing* 50/month quota system rather than a separate counter. Not implemented in any frontend yet since the frontend itself doesn't exist.
-4. **Paddle wiring** — credential, Price IDs, client-side token, webhook registration in Paddle's dashboard, and a full sandbox checkout→webhook→DB-update test. See the Stripe section of the original handoff for the shape of what's needed; same idea, Paddle instead.
-5. GSC/GA4/URL Inspection tools remain deliberately ungated (OAuth verification lead time).
-6. Pricing ($19/$49 placeholders) not validated against real cache-hit-rate economics.
+Built out significantly this session, verified live via Chrome DevTools MCP (screenshots + console checks, not just static review):
+
+- **Content Brief tab** — new. Hero recommendation card, SEO snippet preview, page outline, FAQ, currently-ranking cards, excluded-brand chips, collapsible cluster table + known-limitations list.
+- **Developer menu** — API key box + MCP connect snippet moved out of the main overview card/sidebar into a dropdown under a new "Developer" button in the topbar, per explicit user request to declutter. Had a positioning bug (dropdown overflowed off-screen) — fixed by anchoring to `.topbar-actions` instead of the button itself.
+- **Keyword Explorer tab** — pre-existing, untouched.
+
+**Demo mode** (`?demo=1`): shows static mock data regardless of input for both tabs — this is existing, intentional behavior (Keyword Explorer already worked this way), not a bug, though the user flagged confusion about it for Content Brief specifically. Offered to make it topic-aware; no decision made yet.
+
+## Discovered, not fully audited — flag to the user before assuming it works
+
+An email/password login flow exists in the working directory (`login.html`, `reset-password.html`, `server/src/routes/sessionAccount.js`) that bridges Supabase Auth sessions to the existing apiKey model. These are substantial, apparently complete files (600+ lines each) — **but they were not built in the visible portion of this session's conversation** (likely from an earlier compacted segment) and have not been tested or reviewed here. Before relying on or extending this flow, verify: does `login.html` actually work end-to-end against the current Supabase project? Is `/api/session-account` reachable and correct? Nobody has confirmed this in a session I have visibility into.
+
+## Not yet built / outstanding
+
+1. **Deployment.** The server has never run anywhere but `localhost`. Everything else (Paddle webhooks, MCP endpoint for real customers, `index.html`'s MCP config placeholder) is blocked on this.
+2. **Paddle billing** — `PADDLE_API_KEY`/`PADDLE_WEBHOOK_SECRET` still blank in `.env`; `upgrade.html` still has placeholder Price IDs. No one can pay yet.
+3. **PageSpeed Insights and Historical Metrics have no dashboard UI** — only Keyword Explorer and Content Brief do. Backend routes work fine, just unexposed in the dashboard.
+4. **Full real user journey never run end-to-end** as one connected flow (signup → dashboard → real key → real tool call). Individual pieces tested in isolation.
+5. GSC/GA4/URL Inspection tools remain deliberately ungated (unchanged from session 2).
+6. Pricing ($19/$49) still unvalidated against real cache-hit-rate economics (unchanged from session 2).
+7. The login/reset-password flow above needs a real audit.
 
 ## Test customer
 
 - Email: `manoj.digitalmarketing08@gmail.com`
 - API key: `c217fb8d2835986398b66c8f82026727d21e5a77f82f72f8`
-- Plan: `pro`, quota: 1000 (quota_used was reset to 0 during this session's testing of `Reset Monthly Quotas`)
+- Plan: `pro`, quota: 1000/period (has real usage on it from this session's testing — don't be surprised by non-zero `quota_used_this_period`)
+
+## Credentials status (`server/.env` — not committed, real values live only there)
+
+| Credential | Status |
+|---|---|
+| Supabase URL + service role key | ✅ working |
+| Google Ads OAuth client/secret/refresh token/developer token | ✅ working — bound to Cloud project `196541777409`, developer token from Ads account `306-523-9896`. **Do not swap any of these independently** — see gotcha #1 above. |
+| `PAGESPEED_API_KEY` | ✅ working — also reused for Knowledge Graph API calls (same key, multiple APIs enabled) |
+| `SERPER_API_KEY` | ✅ working |
+| `PADDLE_API_KEY` / `PADDLE_WEBHOOK_SECRET` | ❌ blank |
+
+## Superseded from Session 2 (historical only — n8n is retired)
+
+Everything below this line describes the *retired* n8n-based system. Kept for historical reference only; do not act on it.
+
+<details>
+<summary>Session 2 content (n8n era, retired)</summary>
+
+Continuation of the original build. Session 2: locked down RLS, added quota reset + rate-limit monitoring, built a public dashboard search API, replaced Stripe with Paddle, pushed everything to git — all on n8n (`https://n8n-oyaw.onrender.com`). Session 3 replaced this entire backend with the standalone Node server documented above because the n8n free tier restarted under load.
+
+Git repo: `https://github.com/manojdigitalmarketing08-lab/seo-data` (public). The `workflows/*.json` exports in that repo are historical — superseded by `server/src/routes/*.js` and `server/src/cron/*.js` one-to-one (see `README.md`'s mapping table).
+
+Bugs found in the n8n era (RLS view privileges, RETURNING needing SELECT policies, Execute Sub-workflow credential resolution, alwaysOutputData gaps, Code node error-message mangling, draft-vs-published confusion, Render free-tier restarts) are irrelevant now that n8n is gone, but are preserved in git history if ever useful.
+
+</details>

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in — SEO Keyword API</title>
+<meta name="description" content="Log in to the SEO Keyword API dashboard with your API key.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #6D28D9;
+    --primary-dark: #4C1D95;
+    --primary-darker: #2E1065;
+    --primary-light: #A78BFA;
+    --accent: #22D3EE;
+    --background: #F5F3FB;
+    --surface: #FFFFFF;
+    --text: #1E1B2E;
+    --text-muted: #6B6478;
+    --success: #16A34A;
+    --success-bg: #F0FDF4;
+    --danger: #DC2626;
+    --danger-bg: #FEF2F2;
+    --border: #E7E3F2;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-xl: 28px;
+
+    --shadow-sm: 0 1px 2px rgba(46, 16, 101, .06);
+    --shadow-md: 0 4px 12px rgba(46, 16, 101, .08);
+    --shadow-lg: 0 24px 64px -12px rgba(46, 16, 101, .35);
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 16px;
+    --space-4: 24px;
+    --space-5: 32px;
+    --space-6: 48px;
+    --space-7: 64px;
+
+    --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-body);
+    color: var(--text);
+    background: radial-gradient(circle at 15% 15%, #E9E3FA 0%, var(--background) 45%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+  }
+
+  .card {
+    width: 100%;
+    max-width: 980px;
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 44% 56%;
+  }
+
+  /* ---------- Left: illustration panel ---------- */
+  .panel-intro {
+    position: relative;
+    padding: var(--space-5);
+    min-height: 460px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: #fff;
+    background:
+      radial-gradient(circle at 80% 15%, rgba(167,139,250,.35), transparent 55%),
+      linear-gradient(160deg, var(--primary-darker) 0%, var(--primary-dark) 55%, var(--primary) 100%);
+    overflow: hidden;
+  }
+
+  .panel-intro .stars { position: absolute; inset: 0; opacity: .55; }
+
+  .brand {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 700;
+    font-size: clamp(1rem, 1.4vw, 1.15rem);
+    letter-spacing: -.01em;
+  }
+  .brand-mark {
+    width: 26px; height: 26px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--primary-light));
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .intro-illustration {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: var(--space-4) 0;
+  }
+  .intro-illustration svg { width: 100%; max-width: 260px; height: auto; }
+
+  .float { animation: float 6s ease-in-out infinite; }
+  .float-slow { animation: float 8s ease-in-out infinite; }
+  .float-rev { animation: float 7s ease-in-out infinite reverse; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .float, .float-slow, .float-rev { animation: none; }
+  }
+
+  .intro-copy { position: relative; z-index: 1; }
+  .intro-copy h1 {
+    font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+    line-height: 1.25;
+    margin: 0 0 var(--space-2);
+    font-weight: 800;
+    letter-spacing: -.01em;
+  }
+  .intro-copy p {
+    margin: 0;
+    font-size: .95rem;
+    line-height: 1.5;
+    color: rgba(255,255,255,.82);
+    max-width: 32ch;
+  }
+
+  .intro-footer {
+    position: relative;
+    z-index: 1;
+    margin-top: var(--space-5);
+    font-size: .68rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.6);
+  }
+
+  /* ---------- Right: form panel ---------- */
+  .panel-form {
+    padding: var(--space-6) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .panel-form h2 {
+    margin: 0 0 var(--space-2);
+    font-size: clamp(1.4rem, 2.4vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: -.01em;
+  }
+  .panel-form .lede {
+    margin: 0 0 var(--space-5);
+    color: var(--text-muted);
+    font-size: .95rem;
+    line-height: 1.5;
+  }
+
+  .field { margin-bottom: var(--space-4); }
+  .field-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-2); }
+  .field label { display: block; font-size: .82rem; font-weight: 600; color: var(--text); }
+  .field-hint { font-size: .76rem; color: var(--text-muted); }
+  .field input {
+    width: 100%;
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: .92rem;
+    padding: 13px var(--space-3);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    min-height: 48px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input::placeholder { color: #A7A2B8; font-family: var(--font-body); }
+  .field input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(109,40,217,.15);
+  }
+  .field input:invalid[data-touched="true"] {
+    border-color: var(--danger);
+  }
+
+  .field-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: -8px 0 var(--space-4);
+    font-size: .85rem;
+    color: var(--text-muted);
+  }
+  .field-check input { width: 16px; height: 16px; accent-color: var(--primary); }
+
+  button { font-family: inherit; }
+
+  .btn-primary {
+    width: 100%;
+    min-height: 50px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: background-color .15s ease, transform .1s ease;
+  }
+  .btn-primary:hover { background: #5B21B6; }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-primary:focus-visible { outline: 2px solid var(--primary-dark); outline-offset: 2px; }
+  .btn-primary:disabled { opacity: .65; cursor: progress; }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.5);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation-duration: 1.4s; }
+  }
+
+  .privacy-note {
+    margin-top: var(--space-3);
+    font-size: .78rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .form-message {
+    display: none;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: 12px var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: .85rem;
+    line-height: 1.4;
+    margin-bottom: var(--space-4);
+  }
+  .form-message.is-visible { display: flex; }
+  .form-message.is-error { background: var(--danger-bg); color: #991B1B; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: var(--space-5) 0;
+    color: var(--text-muted);
+    font-size: .78rem;
+  }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+  .signup-line { text-align: center; font-size: .9rem; color: var(--text-muted); }
+  .signup-line a { color: var(--primary); font-weight: 700; text-decoration: none; }
+  .signup-line a:hover { text-decoration: underline; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  @media (max-width: 860px) {
+    .card { grid-template-columns: 1fr; }
+    .panel-intro { min-height: 220px; padding: var(--space-4); }
+    .intro-illustration { padding: var(--space-2) 0; }
+    .intro-illustration svg { max-width: 150px; }
+    .intro-copy p { max-width: none; }
+    .panel-form { padding: var(--space-5) var(--space-4); }
+  }
+
+  @media (max-width: 420px) {
+    body { padding: var(--space-2); }
+    .card { border-radius: var(--radius-lg); }
+  }
+</style>
+</head>
+<body>
+
+<main class="card">
+  <!-- Illustration / brand panel -->
+  <section class="panel-intro" aria-hidden="false">
+    <svg class="stars" width="100%" height="100%" aria-hidden="true" focusable="false">
+      <circle cx="12%" cy="18%" r="1.4" fill="#fff" opacity=".8"/>
+      <circle cx="85%" cy="10%" r="1.6" fill="#fff" opacity=".6"/>
+      <circle cx="70%" cy="70%" r="1.2" fill="#fff" opacity=".7"/>
+      <circle cx="20%" cy="80%" r="1.8" fill="#fff" opacity=".5"/>
+      <circle cx="92%" cy="55%" r="1.3" fill="#fff" opacity=".6"/>
+      <circle cx="45%" cy="8%" r="1.1" fill="#fff" opacity=".7"/>
+    </svg>
+
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">⌁</span>
+      SEO Keyword API
+    </div>
+
+    <div class="intro-illustration">
+      <svg viewBox="0 0 240 240" role="img" aria-labelledby="illoTitle">
+        <title id="illoTitle">Illustration of a key unlocking a dashboard panel surrounded by keyword tags</title>
+        <defs>
+          <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fff"/>
+            <stop offset="1" stop-color="#DCD3F7"/>
+          </linearGradient>
+        </defs>
+
+        <g class="float" opacity=".95">
+          <rect x="150" y="40" width="58" height="20" rx="10" fill="#A78BFA"/>
+          <rect x="160" y="47" width="34" height="6" rx="3" fill="#2E1065" opacity=".5"/>
+        </g>
+        <g class="float-rev" opacity=".95">
+          <rect x="20" y="70" width="46" height="18" rx="9" fill="#22D3EE"/>
+          <rect x="28" y="76" width="26" height="6" rx="3" fill="#0E4C57" opacity=".5"/>
+        </g>
+        <g class="float" opacity=".95" style="animation-delay:1.5s">
+          <rect x="150" y="185" width="50" height="18" rx="9" fill="#F5A3D0"/>
+          <rect x="158" y="191" width="30" height="6" rx="3" fill="#701A47" opacity=".5"/>
+        </g>
+
+        <!-- rounded dashboard panel -->
+        <g class="float-slow" transform="translate(70 78)">
+          <rect width="100" height="76" rx="12" fill="url(#glassGrad)"/>
+          <rect x="12" y="14" width="46" height="8" rx="4" fill="#6D28D9" opacity=".55"/>
+          <rect x="12" y="30" width="76" height="6" rx="3" fill="#2E1065" opacity=".25"/>
+          <rect x="12" y="42" width="76" height="6" rx="3" fill="#2E1065" opacity=".25"/>
+          <rect x="12" y="54" width="50" height="6" rx="3" fill="#2E1065" opacity=".25"/>
+        </g>
+
+        <!-- key -->
+        <g transform="translate(120 128) rotate(-25)">
+          <circle r="20" fill="none" stroke="#fff" stroke-width="8"/>
+          <rect x="14" y="-5" width="46" height="10" rx="3" fill="#fff"/>
+          <rect x="48" y="5" width="8" height="10" fill="#fff"/>
+          <rect x="38" y="5" width="8" height="14" fill="#fff"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="intro-copy">
+      <h1>Welcome back.</h1>
+      <p>Log in with your API key to see your plan, quota, and run a live keyword search.</p>
+    </div>
+
+    <p class="intro-footer">Powered by Google Ads &amp; PageSpeed Insights</p>
+  </section>
+
+  <!-- Form panel -->
+  <section class="panel-form">
+    <h2 id="formTitle">Log in to your dashboard</h2>
+    <p class="lede" id="formLede">Enter your email and password to see your plan, quota, and run a live keyword search.</p>
+
+    <div id="formMessage" class="form-message is-error" role="alert"></div>
+    <div id="formNotice" class="form-message" role="status" style="background:var(--success-bg); color:#166534;"></div>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="email">Email address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          autocomplete="email"
+          placeholder="you@company.com"
+          required
+        >
+      </div>
+
+      <div class="field" id="passwordField">
+        <div class="field-head">
+          <label for="password">Password</label>
+          <button type="button" class="field-hint" id="forgotBtn" style="background:none; border:none; color:var(--primary); font-weight:600; cursor:pointer; padding:0;">Forgot password?</button>
+        </div>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          required
+        >
+      </div>
+
+      <label class="field-check">
+        <input type="checkbox" id="rememberKey" checked>
+        Keep me logged in on this device
+      </label>
+
+      <button type="submit" class="btn-primary" id="submitBtn">
+        <span id="submitLabel">Log in</span>
+      </button>
+
+      <p class="privacy-note">Your password is verified by Supabase Auth — this page never stores it.</p>
+    </form>
+
+    <div class="divider">or</div>
+
+    <p class="signup-line">Don't have an account? <a href="signup.html">Create a free account</a></p>
+    <p class="signup-line" style="margin-top:8px;"><a href="dashboard.html?demo=1">View a live demo instead →</a></p>
+
+    <p id="liveRegion" class="sr-only" role="status" aria-live="polite"></p>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var SUPABASE_URL = 'https://pcmsotnmkxeriapajyco.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjbXNvdG5ta3hlcmlhcGFqeWNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNzc2MDYsImV4cCI6MjEwMjg1MzYwNn0.75WS79xEKQtBR14_-C6ioWHlV3JjOnIg0wCURx0UAKw';
+
+  // Backend origin (server/) that bridges a verified Supabase Auth session to
+  // the customer's apiKey — same origin dashboard.js talks to.
+  var API_BASE_URL = 'http://127.0.0.1:3000';
+  var STORAGE_KEY = 'seoKeywordApi.apiKey';
+
+  var form = document.getElementById('loginForm');
+  var emailInput = document.getElementById('email');
+  var passwordInput = document.getElementById('password');
+  var rememberKey = document.getElementById('rememberKey');
+  var submitBtn = document.getElementById('submitBtn');
+  var submitLabel = document.getElementById('submitLabel');
+  var formMessage = document.getElementById('formMessage');
+  var formNotice = document.getElementById('formNotice');
+  var forgotBtn = document.getElementById('forgotBtn');
+  var passwordField = document.getElementById('passwordField');
+  var formTitle = document.getElementById('formTitle');
+  var formLede = document.getElementById('formLede');
+  var liveRegion = document.getElementById('liveRegion');
+
+  var mode = 'login'; // or 'recover'
+
+  function announce(text) { liveRegion.textContent = text; }
+
+  function showError(text) {
+    formNotice.classList.remove('is-visible');
+    formMessage.textContent = text;
+    formMessage.classList.add('is-visible');
+    announce(text);
+  }
+  function clearError() {
+    formMessage.textContent = '';
+    formMessage.classList.remove('is-visible');
+  }
+  function showNotice(text) {
+    formMessage.classList.remove('is-visible');
+    formNotice.textContent = text;
+    formNotice.classList.add('is-visible');
+    announce(text);
+  }
+  function clearNotice() {
+    formNotice.textContent = '';
+    formNotice.classList.remove('is-visible');
+  }
+
+  function setLoading(isLoading, loadingText) {
+    submitBtn.disabled = isLoading;
+    if (isLoading) {
+      submitLabel.textContent = '';
+      var spinner = document.createElement('span');
+      spinner.className = 'spinner';
+      spinner.setAttribute('aria-hidden', 'true');
+      submitLabel.appendChild(spinner);
+      submitLabel.appendChild(document.createTextNode(' ' + loadingText));
+    } else {
+      submitLabel.textContent = mode === 'recover' ? 'Send reset link' : 'Log in';
+    }
+  }
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  // ---------- "Forgot password?" toggles the form into a recovery-email mode ----------
+  forgotBtn.addEventListener('click', function () {
+    mode = mode === 'recover' ? 'login' : 'recover';
+    clearError();
+    clearNotice();
+    if (mode === 'recover') {
+      passwordField.hidden = true;
+      passwordInput.required = false;
+      formTitle.textContent = 'Reset your password';
+      formLede.textContent = 'Enter your account email and we’ll send a reset link.';
+      submitLabel.textContent = 'Send reset link';
+      forgotBtn.textContent = 'Back to log in';
+    } else {
+      passwordField.hidden = false;
+      passwordInput.required = true;
+      formTitle.textContent = 'Log in to your dashboard';
+      formLede.textContent = 'Enter your email and password to see your plan, quota, and run a live keyword search.';
+      submitLabel.textContent = 'Log in';
+      forgotBtn.textContent = 'Forgot password?';
+    }
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearError();
+    clearNotice();
+
+    var email = emailInput.value.trim();
+    emailInput.setAttribute('data-touched', 'true');
+
+    if (!isValidEmail(email)) {
+      showError('Enter a valid email address.');
+      emailInput.focus();
+      return;
+    }
+
+    if (mode === 'recover') {
+      setLoading(true, 'Sending…');
+      // redirect_to must be on Supabase's Auth > URL Configuration allow-list
+      // (Site URL / Additional Redirect URLs) or GoTrue silently falls back to
+      // the project's default Site URL instead of this page.
+      var resetUrl = new URL('reset-password.html', window.location.href).href;
+      fetch(SUPABASE_URL + '/auth/v1/recover?redirect_to=' + encodeURIComponent(resetUrl), {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      })
+        .then(function () {
+          setLoading(false);
+          showNotice('If an account exists for that email, a reset link is on its way.');
+        })
+        .catch(function () {
+          setLoading(false);
+          showError('Network error — check your connection and try again.');
+        });
+      return;
+    }
+
+    var password = passwordInput.value;
+    passwordInput.setAttribute('data-touched', 'true');
+    if (!password) {
+      showError('Enter your password.');
+      passwordInput.focus();
+      return;
+    }
+
+    setLoading(true, 'Logging in…');
+
+    fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    })
+      .then(function (res) {
+        return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+      })
+      .then(function (authResult) {
+        if (!authResult.ok || !authResult.data.access_token) {
+          var errCode = authResult.data && authResult.data.error_code;
+          if (errCode === 'email_not_confirmed') {
+            throw { handled: true, message: 'Please confirm your email address first — check your inbox for a confirmation link, then log in again.' };
+          }
+          throw { handled: true, message: 'Incorrect email or password.' };
+        }
+        return fetch(API_BASE_URL + '/api/session-account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessToken: authResult.data.access_token })
+        });
+      })
+      .then(function (res) {
+        return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+      })
+      .then(function (result) {
+        setLoading(false);
+
+        if (!result.ok || !result.data.ok) {
+          var code = result.data && result.data.code;
+          if (code === 'NO_CUSTOMER_RECORD') {
+            showError('Your login works, but no account data was found for this email. Try signing up again.');
+          } else {
+            showError((result.data && result.data.message) || 'Something went wrong. Please try again.');
+          }
+          return;
+        }
+
+        try {
+          if (rememberKey.checked) {
+            localStorage.setItem(STORAGE_KEY, result.data.apiKey);
+          } else {
+            localStorage.removeItem(STORAGE_KEY);
+            sessionStorage.setItem(STORAGE_KEY, result.data.apiKey);
+          }
+        } catch (err) { /* no-op */ }
+
+        announce('Logged in. Redirecting to your dashboard…');
+        window.location.href = 'dashboard.html';
+      })
+      .catch(function (err) {
+        setLoading(false);
+        if (err && err.handled) {
+          showError(err.message);
+        } else {
+          showError('Network error — check your connection and that the API server is reachable.');
+        }
+      });
+  });
+})();
+</script>
+
+</body>
+</html>
