@@ -43,12 +43,16 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 // Paid tool routes: no CORS (server-to-server / MCP callers, not browsers) +
 // the stricter per-apiKey limiter on top of the general one.
 app.use('/api/keyword-ideas', gatedToolLimiter, keywordIdeasRoute);
-app.use('/api/historical-metrics', gatedToolLimiter, historicalMetricsRoute);
-app.use('/api/pagespeed', gatedToolLimiter, pagespeedRoute);
 
-// Content Brief is also called directly from dashboard.html's browser fetch
-// (the Content Brief tab), so — unlike the tool routes above — it needs the
-// same public-CORS treatment as the dashboard-callable routes below.
+// Content Brief, Historical Metrics, and PageSpeed Insights are ALSO called
+// directly from dashboard.html's browser fetch (Content Brief / History /
+// Speed tabs), so — unlike /api/keyword-ideas above, which the dashboard
+// reaches only via the separate /dashboard-search-keywords route — these
+// need the same public-CORS treatment as the dashboard-callable routes below.
+// (See commit cfbe2fe: the same miscategorization silently broke Content
+// Brief from the dashboard before this was caught by /qa.)
+app.use('/api/historical-metrics', cors(dashboardCorsOptions), gatedToolLimiter, historicalMetricsRoute);
+app.use('/api/pagespeed', cors(dashboardCorsOptions), gatedToolLimiter, pagespeedRoute);
 app.use('/api/content-brief', cors(dashboardCorsOptions), gatedToolLimiter, contentBriefRoute);
 
 // Public dashboard endpoint: open CORS (restrict via ALLOWED_DASHBOARD_ORIGIN once

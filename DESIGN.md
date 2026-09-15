@@ -92,7 +92,7 @@ Loading: General Sans via Fontshare's CSS API (`https://api.fontshare.com/v2/css
 
 ## Layout
 
-**Sidebar + main content shell** (`.app-shell`): a fixed-width (76px) icon sidebar on the left holding only real, functional navigation (the two actual tool tabs — Keyword Explorer, Content Brief) — no decorative/non-functional nav items. Account-level actions (API key/MCP/Search Console, Upgrade, Switch key) stay in the top bar, unchanged from before, rather than duplicated into the sidebar. Below 720px the sidebar collapses to a horizontal pill row above the content instead of disappearing.
+**Sidebar + main content shell** (`.app-shell`): a fixed-width (76px) icon sidebar on the left holding only real, functional navigation — now four tabs: Keyword Explorer, Content Brief, PageSpeed Insights, Historical Metrics — no decorative/non-functional nav items. Account-level actions (API key/MCP/Search Console, Upgrade, Switch key) stay in the top bar, unchanged from before, rather than duplicated into the sidebar. Below 720px the sidebar collapses to a horizontal row above the content; that row scrolls horizontally rather than wrapping or shrinking further, since 4 icon+label items don't fit one screen width on a phone.
 
 Overview stats moved from a single quota row into a 4-tile grid (Plan, Requests used, Remaining, Resets) — closer to the reference's stat-tile row, still built entirely from real account data (no invented metrics). Grid-disciplined data tables remain unchanged: strict column alignment, no exceptions.
 
@@ -141,3 +141,4 @@ Radius hierarchy: sm (6px) for buttons/inputs/badges/sidebar icon-tile, md (10px
 | 2026-09-15 | Replaced warm ivory/cream background (#F5F4F1) with near-white (#FFFFFF page, #F7F7F5 cards) | User asked to change the cream color after implementation |
 | 2026-09-15 | Replaced muted teal accent (#2F7D6B) with confident blue (#3B6EE0) | User asked to change the green color after implementation |
 | 2026-09-16 | Full pivot: light/blue system → dark, sidebar-nav, glass-blur, amber-accent system | User supplied a reference screenshot of a dark creator-analytics dashboard and asked to match it; explicitly declined the hero-photo element as not fitting a B2B API tool |
+| 2026-09-16 | Added PageSpeed Insights and Historical Metrics as full dashboard tabs (score tiles + metrics list; keyword table + real-data text sparkline) | Closed a known gap from HANDOFF.md — both had working backend routes but no UI. Sidebar mobile row switched from wrap to horizontal scroll since 4 tabs don't fit one phone-width row |

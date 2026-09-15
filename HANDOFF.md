@@ -84,11 +84,11 @@ An email/password login flow exists in the working directory (`login.html`, `res
 
 1. **Deployment.** The server has never run anywhere but `localhost`. Everything else (Paddle webhooks, MCP endpoint for real customers, `index.html`'s MCP config placeholder) is blocked on this.
 2. **Paddle billing** — `PADDLE_API_KEY`/`PADDLE_WEBHOOK_SECRET` still blank in `.env`; `upgrade.html` still has placeholder Price IDs. No one can pay yet.
-3. **PageSpeed Insights and Historical Metrics have no dashboard UI** — only Keyword Explorer and Content Brief do. Backend routes work fine, just unexposed in the dashboard.
-4. **Full real user journey never run end-to-end** as one connected flow (signup → dashboard → real key → real tool call). Individual pieces tested in isolation.
+3. ~~PageSpeed Insights and Historical Metrics have no dashboard UI~~ — **done.** Both are now full sidebar tabs (score tiles + core web vitals list; keyword table + real-data text sparkline). Same CORS miscategorization bug as Content Brief hit both on the way in — fixed at the same time (see `server/src/index.js`).
+4. ~~Full real user journey never run end-to-end~~ — **done**, via `/qa`. See its report in `.gstack/qa-reports/`.
 5. GSC/GA4/URL Inspection tools remain deliberately ungated (unchanged from session 2).
 6. Pricing ($19/$49) still unvalidated against real cache-hit-rate economics (unchanged from session 2).
-7. The login/reset-password flow above needs a real audit.
+7. ~~The login/reset-password flow above needs a real audit.~~ — **done.** Fully audited via `/qa`, including a live login success run after the test account's email was confirmed via Supabase's admin API (the default mailer's rate limit blocked the real confirmation email — see the QA report and consider custom SMTP before launch).
 
 ## Test customer
 

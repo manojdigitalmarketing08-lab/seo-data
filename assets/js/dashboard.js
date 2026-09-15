@@ -86,6 +86,49 @@
     ]
   };
 
+  var DEMO_PAGESPEED = {
+    lighthouseResult: {
+      categories: {
+        performance: { score: 0.82 },
+        accessibility: { score: 0.94 },
+        'best-practices': { score: 0.89 },
+        seo: { score: 1 }
+      },
+      audits: {
+        'first-contentful-paint': { displayValue: '1.2 s' },
+        'largest-contentful-paint': { displayValue: '2.1 s' },
+        'speed-index': { displayValue: '2.4 s' },
+        'total-blocking-time': { displayValue: '90 ms' },
+        'cumulative-layout-shift': { displayValue: '0.02' }
+      }
+    }
+  };
+  var DEMO_HISTORICAL = {
+    results: [
+      {
+        text: 'seo keyword api',
+        keywordMetrics: {
+          avgMonthlySearches: 1900,
+          competition: 'LOW',
+          monthlySearchVolumes: [
+            { year: 2025, month: 10, monthlySearches: 1200 },
+            { year: 2025, month: 11, monthlySearches: 1400 },
+            { year: 2025, month: 12, monthlySearches: 2200 },
+            { year: 2026, month: 1, monthlySearches: 1800 },
+            { year: 2026, month: 2, monthlySearches: 1600 },
+            { year: 2026, month: 3, monthlySearches: 1700 },
+            { year: 2026, month: 4, monthlySearches: 1900 },
+            { year: 2026, month: 5, monthlySearches: 2100 },
+            { year: 2026, month: 6, monthlySearches: 1950 },
+            { year: 2026, month: 7, monthlySearches: 1880 },
+            { year: 2026, month: 8, monthlySearches: 1900 },
+            { year: 2026, month: 9, monthlySearches: 1900 }
+          ]
+        }
+      }
+    ]
+  };
+
   // ---------- Element refs ----------
   var gateWrap = document.getElementById('gateWrap');
   var gateForm = document.getElementById('gateForm');
@@ -146,8 +189,41 @@
   // Tabs
   var tabKeywordExplorer = document.getElementById('tabKeywordExplorer');
   var tabContentBrief = document.getElementById('tabContentBrief');
+  var tabPagespeed = document.getElementById('tabPagespeed');
+  var tabHistorical = document.getElementById('tabHistorical');
   var paneKeywordExplorer = document.getElementById('paneKeywordExplorer');
   var paneContentBrief = document.getElementById('paneContentBrief');
+  var panePagespeed = document.getElementById('panePagespeed');
+  var paneHistorical = document.getElementById('paneHistorical');
+
+  // PageSpeed Insights
+  var pagespeedForm = document.getElementById('pagespeedForm');
+  var pagespeedUrlInput = document.getElementById('pagespeedUrl');
+  var pagespeedStrategySelect = document.getElementById('pagespeedStrategy');
+  var pagespeedSubmit = document.getElementById('pagespeedSubmit');
+  var pagespeedStatus = document.getElementById('pagespeedStatus');
+  var pagespeedError = document.getElementById('pagespeedError');
+  var pagespeedErrorText = document.getElementById('pagespeedErrorText');
+  var pagespeedResults = document.getElementById('pagespeedResults');
+  var pagespeedEmpty = document.getElementById('pagespeedEmpty');
+  var pagespeedSourceBadge = document.getElementById('pagespeedSourceBadge');
+  var pagespeedUrlLabel = document.getElementById('pagespeedUrlLabel');
+  var scoreTiles = document.getElementById('scoreTiles');
+  var metricsList = document.getElementById('metricsList');
+
+  // Historical Metrics
+  var historicalForm = document.getElementById('historicalForm');
+  var historicalKeywordsInput = document.getElementById('historicalKeywords');
+  var historicalLocationSelect = document.getElementById('historicalLocation');
+  var historicalSubmit = document.getElementById('historicalSubmit');
+  var historicalStatus = document.getElementById('historicalStatus');
+  var historicalError = document.getElementById('historicalError');
+  var historicalErrorText = document.getElementById('historicalErrorText');
+  var historicalResultsWrap = document.getElementById('historicalResultsWrap');
+  var historicalEmpty = document.getElementById('historicalEmpty');
+  var historicalBody = document.getElementById('historicalBody');
+  var historicalSourceBadge = document.getElementById('historicalSourceBadge');
+  var historicalResultCount = document.getElementById('historicalResultCount');
 
   // Content Brief
   var briefForm = document.getElementById('briefForm');
@@ -319,17 +395,23 @@
   signOutBtn.addEventListener('click', exitDashboard);
 
   // ---------- Tabs ----------
-  function activateTab(tab) {
-    var isKeyword = tab === 'keyword';
-    tabKeywordExplorer.classList.toggle('is-active', isKeyword);
-    tabKeywordExplorer.setAttribute('aria-selected', String(isKeyword));
-    tabContentBrief.classList.toggle('is-active', !isKeyword);
-    tabContentBrief.setAttribute('aria-selected', String(!isKeyword));
-    paneKeywordExplorer.hidden = !isKeyword;
-    paneContentBrief.hidden = isKeyword;
+  var tabs = {
+    keyword: { btn: tabKeywordExplorer, pane: paneKeywordExplorer },
+    brief: { btn: tabContentBrief, pane: paneContentBrief },
+    pagespeed: { btn: tabPagespeed, pane: panePagespeed },
+    historical: { btn: tabHistorical, pane: paneHistorical }
+  };
+  function activateTab(active) {
+    Object.keys(tabs).forEach(function (key) {
+      var isActive = key === active;
+      tabs[key].btn.classList.toggle('is-active', isActive);
+      tabs[key].btn.setAttribute('aria-selected', String(isActive));
+      tabs[key].pane.hidden = !isActive;
+    });
   }
-  tabKeywordExplorer.addEventListener('click', function () { activateTab('keyword'); });
-  tabContentBrief.addEventListener('click', function () { activateTab('brief'); });
+  Object.keys(tabs).forEach(function (key) {
+    tabs[key].btn.addEventListener('click', function () { activateTab(key); });
+  });
 
   copyKeyBtn.addEventListener('click', function () {
     if (!currentKey) return;
@@ -817,6 +899,254 @@
         briefErrorText.textContent = 'Network error — check your connection and that the API server is reachable.';
         briefError.hidden = false;
         briefEmpty.hidden = false;
+      });
+  });
+
+  // ---------- PageSpeed Insights ----------
+  function parsePagespeedResult(rawResult) {
+    var lr = (rawResult && rawResult.lighthouseResult) || {};
+    var categories = lr.categories || {};
+    var audits = lr.audits || {};
+    function scoreOf(key) {
+      var c = categories[key];
+      return c && c.score != null ? Math.round(c.score * 100) : null;
+    }
+    function auditVal(key) {
+      var a = audits[key];
+      return a && a.displayValue ? a.displayValue : '—';
+    }
+    return {
+      scores: {
+        performance: scoreOf('performance'),
+        accessibility: scoreOf('accessibility'),
+        bestPractices: scoreOf('best-practices'),
+        seo: scoreOf('seo')
+      },
+      metrics: [
+        { label: 'First Contentful Paint', value: auditVal('first-contentful-paint') },
+        { label: 'Largest Contentful Paint', value: auditVal('largest-contentful-paint') },
+        { label: 'Speed Index', value: auditVal('speed-index') },
+        { label: 'Total Blocking Time', value: auditVal('total-blocking-time') },
+        { label: 'Cumulative Layout Shift', value: auditVal('cumulative-layout-shift') }
+      ]
+    };
+  }
+
+  function scoreClass(score) {
+    if (score == null) return '';
+    if (score >= 90) return 'is-good';
+    if (score >= 50) return 'is-mid';
+    return 'is-poor';
+  }
+
+  function renderPagespeed(rawResult, source, url) {
+    pagespeedSourceBadge.textContent = source === 'cache' ? 'from cache' : 'live result';
+    pagespeedSourceBadge.className = 'source-badge ' + (source === 'cache' ? 'is-cache' : 'is-live');
+    pagespeedUrlLabel.textContent = url;
+
+    var parsed = parsePagespeedResult(rawResult);
+
+    scoreTiles.innerHTML = '';
+    [
+      { key: 'performance', label: 'Performance' },
+      { key: 'accessibility', label: 'Accessibility' },
+      { key: 'bestPractices', label: 'Best Practices' },
+      { key: 'seo', label: 'SEO' }
+    ].forEach(function (item) {
+      var score = parsed.scores[item.key];
+      var div = document.createElement('div');
+      div.className = 'score-tile ' + scoreClass(score);
+      div.innerHTML =
+        '<span class="score-tile-value">' + (score != null ? score : '—') + '</span>' +
+        '<span class="score-tile-label">' + escapeHtml(item.label) + '</span>';
+      scoreTiles.appendChild(div);
+    });
+
+    metricsList.innerHTML = '';
+    parsed.metrics.forEach(function (m) {
+      var row = document.createElement('div');
+      row.className = 'metric-row';
+      row.innerHTML = '<span class="metric-label">' + escapeHtml(m.label) + '</span><span class="metric-value">' + escapeHtml(m.value) + '</span>';
+      metricsList.appendChild(row);
+    });
+
+    pagespeedEmpty.hidden = true;
+    pagespeedResults.hidden = false;
+  }
+
+  function setPagespeedLoading(isLoading) {
+    pagespeedSubmit.disabled = isLoading;
+    pagespeedStatus.hidden = !isLoading;
+  }
+
+  pagespeedForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!currentKey) return;
+
+    var url = pagespeedUrlInput.value.trim();
+    if (!url) return;
+
+    pagespeedError.hidden = true;
+    pagespeedResults.hidden = true;
+    pagespeedEmpty.hidden = true;
+    setPagespeedLoading(true);
+
+    if (isDemo) {
+      setTimeout(function () {
+        setPagespeedLoading(false);
+        renderPagespeed(DEMO_PAGESPEED, 'live', url);
+      }, 700);
+      return;
+    }
+
+    fetch(API_BASE_URL + '/api/pagespeed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: currentKey, url: url, strategy: pagespeedStrategySelect.value })
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (result) {
+        setPagespeedLoading(false);
+
+        if (!result.ok || !result.data.ok) {
+          var code = result.data && result.data.code;
+          var msg = (result.data && result.data.message) || 'Something went wrong. Try again.';
+          if (code === 'QUOTA_EXCEEDED') {
+            msg = 'You’ve used your full monthly quota. Upgrade your plan to keep analyzing pages.';
+          }
+          pagespeedErrorText.innerHTML = escapeHtml(msg) + (code === 'QUOTA_EXCEEDED' ? ' <a href="upgrade.html">Upgrade →</a>' : '');
+          pagespeedError.hidden = false;
+          pagespeedEmpty.hidden = false;
+          return;
+        }
+
+        renderPagespeed(result.data.result, result.data.source, url);
+
+        // Refresh quota display — this call just counted against it (unless cached).
+        verifyAndEnter(currentKey, { silent: true });
+      })
+      .catch(function () {
+        setPagespeedLoading(false);
+        pagespeedErrorText.textContent = 'Network error — check your connection and that the API server is reachable.';
+        pagespeedError.hidden = false;
+        pagespeedEmpty.hidden = false;
+      });
+  });
+
+  // ---------- Historical Metrics ----------
+  function buildSparkline(volumes) {
+    if (!volumes || volumes.length === 0) return '—';
+    var blocks = '▁▂▃▄▅▆▇█';
+    var values = volumes.map(function (v) { return v.monthlySearches || 0; });
+    var min = Math.min.apply(null, values);
+    var max = Math.max.apply(null, values);
+    var range = max - min || 1;
+    return values.map(function (v) {
+      var idx = Math.round(((v - min) / range) * (blocks.length - 1));
+      return blocks.charAt(idx);
+    }).join('');
+  }
+
+  function parseHistoricalResults(payload) {
+    var raw = payload || {};
+    var list = raw.results || [];
+    return list.map(function (item) {
+      var metrics = item.keywordMetrics || {};
+      var volumes = (metrics.monthlySearchVolumes || []).slice(-12);
+      return {
+        keyword: item.text || '—',
+        avgMonthlySearches: metrics.avgMonthlySearches != null ? Number(metrics.avgMonthlySearches).toLocaleString() : '—',
+        competition: formatCompetition(metrics.competition),
+        sparkline: buildSparkline(volumes)
+      };
+    });
+  }
+
+  function renderHistoricalRows(rows) {
+    historicalBody.innerHTML = '';
+    if (rows.length === 0) {
+      historicalEmpty.hidden = false;
+      historicalEmpty.textContent = 'No historical data found for those keywords.';
+      return;
+    }
+    historicalEmpty.hidden = true;
+    rows.forEach(function (row) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + escapeHtml(row.keyword) + '</td>' +
+        '<td>' + escapeHtml(row.avgMonthlySearches) + '</td>' +
+        '<td>' + escapeHtml(row.competition) + '</td>' +
+        '<td class="sparkline">' + escapeHtml(row.sparkline) + '</td>';
+      historicalBody.appendChild(tr);
+    });
+  }
+
+  function setHistoricalLoading(isLoading) {
+    historicalSubmit.disabled = isLoading;
+    historicalStatus.hidden = !isLoading;
+  }
+
+  historicalForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!currentKey) return;
+
+    var keywords = historicalKeywordsInput.value.trim();
+    if (!keywords) return;
+
+    historicalError.hidden = true;
+    historicalResultsWrap.hidden = true;
+    historicalEmpty.hidden = true;
+    setHistoricalLoading(true);
+
+    if (isDemo) {
+      setTimeout(function () {
+        setHistoricalLoading(false);
+        var rows = parseHistoricalResults(DEMO_HISTORICAL);
+        historicalSourceBadge.textContent = 'live result';
+        historicalSourceBadge.className = 'source-badge is-live';
+        historicalResultCount.textContent = rows.length + ' keyword' + (rows.length === 1 ? '' : 's') + ' (demo data)';
+        renderHistoricalRows(rows);
+        historicalResultsWrap.hidden = false;
+      }, 500);
+      return;
+    }
+
+    fetch(API_BASE_URL + '/api/historical-metrics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: currentKey, keywords: keywords, location: historicalLocationSelect.value })
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (result) {
+        setHistoricalLoading(false);
+
+        if (!result.ok || !result.data.ok) {
+          var code = result.data && result.data.code;
+          var msg = (result.data && result.data.message) || 'Something went wrong. Try again.';
+          if (code === 'QUOTA_EXCEEDED') {
+            msg = 'You’ve used your full monthly quota. Upgrade your plan to keep searching.';
+          }
+          historicalErrorText.innerHTML = escapeHtml(msg) + (code === 'QUOTA_EXCEEDED' ? ' <a href="upgrade.html">Upgrade →</a>' : '');
+          historicalError.hidden = false;
+          historicalEmpty.hidden = false;
+          return;
+        }
+
+        var rows = parseHistoricalResults(result.data.result);
+        historicalSourceBadge.textContent = result.data.source === 'cache' ? 'from cache' : 'live result';
+        historicalSourceBadge.className = 'source-badge ' + (result.data.source === 'cache' ? 'is-cache' : 'is-live');
+        historicalResultCount.textContent = rows.length + ' keyword' + (rows.length === 1 ? '' : 's');
+        renderHistoricalRows(rows);
+        historicalResultsWrap.hidden = false;
+
+        // Refresh quota display — this call just counted against it (unless cached).
+        verifyAndEnter(currentKey, { silent: true });
+      })
+      .catch(function () {
+        setHistoricalLoading(false);
+        historicalErrorText.textContent = 'Network error — check your connection and that the API server is reachable.';
+        historicalError.hidden = false;
+        historicalEmpty.hidden = false;
       });
   });
 

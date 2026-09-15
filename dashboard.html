@@ -109,6 +109,14 @@
             <span class="sidebar-nav-icon" aria-hidden="true">&#9776;</span>
             <span class="sidebar-nav-label">Brief</span>
           </button>
+          <button type="button" class="sidebar-nav-btn" id="tabPagespeed" role="tab" aria-selected="false" aria-controls="panePagespeed" title="PageSpeed Insights">
+            <span class="sidebar-nav-icon" aria-hidden="true">&#9889;</span>
+            <span class="sidebar-nav-label">Speed</span>
+          </button>
+          <button type="button" class="sidebar-nav-btn" id="tabHistorical" role="tab" aria-selected="false" aria-controls="paneHistorical" title="Historical Metrics">
+            <span class="sidebar-nav-icon" aria-hidden="true">&#8635;</span>
+            <span class="sidebar-nav-label">History</span>
+          </button>
         </nav>
       </aside>
 
@@ -307,6 +315,99 @@
           </div>
 
           <div class="empty-state" id="briefEmpty">Enter a topic to generate a content brief.</div>
+        </section>
+
+        <!-- Pane: PageSpeed Insights -->
+        <section class="panel panel-primary tool-pane" id="panePagespeed" role="tabpanel" hidden>
+          <h2>PageSpeed Insights</h2>
+          <p class="panel-sub">Real Lighthouse scores and core web vitals for any URL — cached and counted against your quota.</p>
+
+          <form class="tool-form" id="pagespeedForm">
+            <div class="field">
+              <label for="pagespeedUrl">URL</label>
+              <input type="url" id="pagespeedUrl" name="url" placeholder="https://example.com" required>
+            </div>
+            <div class="field">
+              <label for="pagespeedStrategy">Device</label>
+              <select id="pagespeedStrategy" name="strategy">
+                <option value="mobile" selected>Mobile</option>
+                <option value="desktop">Desktop</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="pagespeedSubmit">Analyze</button>
+          </form>
+
+          <div class="tool-status" id="pagespeedStatus" hidden>
+            <span class="spinner-sm" aria-hidden="true"></span>
+            <span>Running Lighthouse against PageSpeed Insights…</span>
+          </div>
+
+          <div class="alert alert-danger" id="pagespeedError" role="alert" hidden>
+            <span id="pagespeedErrorText"></span>
+          </div>
+
+          <div class="pagespeed-results" id="pagespeedResults" hidden>
+            <div class="results-meta">
+              <span class="source-badge" id="pagespeedSourceBadge"></span>
+              <span id="pagespeedUrlLabel"></span>
+            </div>
+            <div class="score-tiles" id="scoreTiles"></div>
+            <div class="metrics-list" id="metricsList"></div>
+          </div>
+
+          <div class="empty-state" id="pagespeedEmpty">Enter a URL to run a PageSpeed analysis.</div>
+        </section>
+
+        <!-- Pane: Historical Metrics -->
+        <section class="panel panel-primary tool-pane" id="paneHistorical" role="tabpanel" hidden>
+          <h2>Historical Metrics</h2>
+          <p class="panel-sub">Monthly search volume history for specific keywords, straight from Google Ads — cached and counted against your quota.</p>
+
+          <form class="tool-form" id="historicalForm">
+            <div class="field">
+              <label for="historicalKeywords">Keywords</label>
+              <input type="text" id="historicalKeywords" name="keywords" placeholder="seo keyword api, keyword research tool" required>
+            </div>
+            <div class="field">
+              <label for="historicalLocation">Location</label>
+              <select id="historicalLocation" name="location">
+                <option value="india" selected>India</option>
+                <option value="united states">United States</option>
+                <option value="united kingdom">United Kingdom</option>
+                <option value="canada">Canada</option>
+                <option value="australia">Australia</option>
+                <option value="germany">Germany</option>
+                <option value="global">Global</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="historicalSubmit">Search</button>
+          </form>
+
+          <div class="tool-status" id="historicalStatus" hidden>
+            <span class="spinner-sm" aria-hidden="true"></span>
+            <span>Querying Google Ads historical metrics…</span>
+          </div>
+
+          <div class="alert alert-danger" id="historicalError" role="alert" hidden>
+            <span id="historicalErrorText"></span>
+          </div>
+
+          <div class="results-wrap" id="historicalResultsWrap" hidden>
+            <div class="results-meta">
+              <span class="source-badge" id="historicalSourceBadge"></span>
+              <span id="historicalResultCount"></span>
+            </div>
+            <div class="table-scroll">
+              <table class="keyword-table">
+                <thead>
+                  <tr><th scope="col">Keyword</th><th scope="col">Avg. monthly searches</th><th scope="col">Competition</th><th scope="col">12-mo trend</th></tr>
+                </thead>
+                <tbody id="historicalBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="empty-state" id="historicalEmpty">Enter one or more keywords to see search volume history.</div>
         </section>
 
       </div>

@@ -114,8 +114,15 @@ body.dashboard-body .dev-dropdown {
     position: static;
     padding: var(--space-3);
   }
-  .sidebar-nav { flex-direction: row; width: auto; }
-  .sidebar-nav-btn { width: auto; flex-direction: row; padding: 8px 14px; }
+  .sidebar-nav {
+    flex-direction: row;
+    width: auto;
+    min-width: 0;
+    flex: 1;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sidebar-nav-btn { width: auto; flex-direction: row; flex-shrink: 0; padding: 8px 14px; }
 }
 
 /* ---------- Stat tiles (overview card) ---------- */
@@ -550,6 +557,44 @@ body.dashboard-body .dev-dropdown {
   padding-left: 14px;
   position: relative;
 }
+/* ---------- PageSpeed Insights ---------- */
+.pagespeed-results { margin-top: var(--space-4); display: flex; flex-direction: column; gap: var(--space-4); }
+.pagespeed-results[hidden] { display: none; }
+
+.score-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); }
+@media (max-width: 560px) { .score-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.score-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-4) var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+.score-tile-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1.75rem; font-weight: 700; color: var(--muted); }
+.score-tile-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.score-tile.is-good .score-tile-value { color: var(--accent); }
+.score-tile.is-mid .score-tile-value { color: #FFC15E; }
+.score-tile.is-poor .score-tile-value { color: var(--danger); }
+
+.metrics-list { display: flex; flex-direction: column; }
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  font-size: .86rem;
+}
+.metric-row:first-child { border-top: none; }
+.metric-label { color: var(--muted); }
+.metric-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text); }
+
+/* ---------- Historical Metrics ---------- */
+.sparkline { letter-spacing: 1px; }
+
 .brief-limitations-list li::before {
   content: "";
   position: absolute;
