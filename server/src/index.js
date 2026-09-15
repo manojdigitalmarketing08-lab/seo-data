@@ -45,7 +45,11 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 app.use('/api/keyword-ideas', gatedToolLimiter, keywordIdeasRoute);
 app.use('/api/historical-metrics', gatedToolLimiter, historicalMetricsRoute);
 app.use('/api/pagespeed', gatedToolLimiter, pagespeedRoute);
-app.use('/api/content-brief', gatedToolLimiter, contentBriefRoute);
+
+// Content Brief is also called directly from dashboard.html's browser fetch
+// (the Content Brief tab), so — unlike the tool routes above — it needs the
+// same public-CORS treatment as the dashboard-callable routes below.
+app.use('/api/content-brief', cors(dashboardCorsOptions), gatedToolLimiter, contentBriefRoute);
 
 // Public dashboard endpoint: open CORS (restrict via ALLOWED_DASHBOARD_ORIGIN once
 // the dashboard frontend has a real domain) + the same per-apiKey limiter.
