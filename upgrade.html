@@ -333,6 +333,12 @@
       var plan = btn.getAttribute('data-plan');
       var priceId = CONFIG.priceIds[plan];
 
+      if (!CONFIG.clientToken || CONFIG.clientToken.indexOf('REPLACE_ME') === 0 ||
+          !priceId || priceId.indexOf('REPLACE_ME') === 0) {
+        showError('Billing isn\'t configured yet — please check back shortly.');
+        return;
+      }
+
       Paddle.Checkout.open({
         items: [{ priceId: priceId, quantity: 1 }],
         customer: { email: email },
