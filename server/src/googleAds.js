@@ -36,7 +36,7 @@ async function getAccessToken() {
 async function callGoogleAds(endpoint, body) {
   const token = await getAccessToken();
   const res = await fetch(
-    `https://googleads.googleapis.com/v22/customers/${GOOGLE_ADS_CUSTOMER_ID}:${endpoint}`,
+    `https://googleads.googleapis.com/v23/customers/${GOOGLE_ADS_CUSTOMER_ID}:${endpoint}`,
     {
       method: 'POST',
       headers: {
